@@ -8,10 +8,10 @@ st.set_page_config(page_title="Digital HoQ - UKM Tahu", layout="wide")
 
 st.markdown("""
     <style>
-    .main-header { font-size: 28px; font-weight: bold; color: #1E3A8A; margin-bottom: 10px; }
-    .sub-header { font-size: 18px; color: #64748b; margin-bottom: 20px; }
+    .main-header { font-size: 28px; font-weight: bold; color: #38bdf8; margin-bottom: 10px; }
+    .sub-header { font-size: 18px; color: #94a3b8; margin-bottom: 20px; }
     
-    /* Style Tabel Rumah HoQ Modern - Muted & Clean */
+    /* Style Tabel Rumah HoQ untuk Tema Gelap (Dark Mode) */
     .hoq-table {
         border-collapse: collapse;
         margin: 20px 0;
@@ -19,52 +19,52 @@ st.markdown("""
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
-        background-color: #ffffff; /* Base tabel putih */
+        background-color: #0f172a; /* Background dasar tabel gelap modern */
     }
     .hoq-table th, .hoq-table td {
-        border: 1px solid #e2e8f0;
+        border: 1px solid #334155;
         padding: 12px;
         text-align: center;
         font-size: 14px;
-        color: #334155;
+        color: #f1f5f9; /* Teks default putih/terang */
     }
     .hoq-th-corner {
-        background-color: #f8fafc;
+        background-color: #1e293b;
         font-weight: 600;
-        color: #475569;
+        color: #94a3b8;
     }
     .hoq-th-hows {
-        background-color: #1E3A8A; /* Sesuai Request: Biru Tua #1E3A8A */
-        color: #ffffff;            /* Teks Putih */
+        background-color: #1E3A8A; /* Warna Biru #1E3A8A tetap di header */
+        color: #ffffff !important;  /* Memaksa teks tetap putih cerah */
         font-weight: 600;
     }
     .hoq-td-whats {
-        background-color: #f8fafc;
+        background-color: #1e293b;
         text-align: left !important;
         font-weight: 600;
-        color: #334155;
+        color: #f1f5f9;
     }
     .hoq-importance {
-        background-color: #fafaf9;
+        background-color: #1e293b;
         font-weight: 600;
-        color: #475569;
+        color: #cbd5e1;
     }
     .hoq-score-row {
-        background-color: #f8fafc;
+        background-color: #1e293b;
         font-weight: bold;
-        color: #1E3A8A;
-        border-top: 2px solid #cbd5e1;
+        color: #38bdf8;
+        border-top: 2px solid #475569;
     }
     .hoq-weight-row {
-        background-color: #f8fafc;
+        background-color: #1e293b;
         font-weight: bold;
-        color: #0f766e;
+        color: #2dd4bf;
     }
     
-    /* Memastikan sel default tanpa kondisi warna tetap berwarna putih */
+    /* Memaksa isi sel default (nilai 0) berwarna latar hitam/gelap */
     .hoq-table td:not([style]) {
-        background-color: #ffffff;
-        color: #334155;
+        background-color: #0f172a !important;
+        color: #64748b !important;
     }
     </style>
     """, unsafe_allow_html=True)
