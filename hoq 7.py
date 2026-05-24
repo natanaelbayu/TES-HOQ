@@ -39,26 +39,26 @@ st.markdown("""
         font-weight: 600;
     }
     .hoq-td-whats {
-        background-color: #1e293b;
+        background-color: #38bdf8;
         text-align: left !important;
         font-weight: 600;
-        color: #f1f5f9;
+        color: #1e293b;
     }
     .hoq-importance {
-        background-color: #1e293b;
+        background-color: #38bdf8;
         font-weight: 600;
-        color: #cbd5e1;
+        color: #1e293b;
     }
     .hoq-score-row {
-        background-color: #1e293b;
+        background-color: #38bdf8;
         font-weight: bold;
-        color: #38bdf8;
+        color:  #1e293b;
         border-top: 2px solid #475569;
     }
     .hoq-weight-row {
-        background-color: #1e293b;
+        background-color: #38bdf8;
         font-weight: bold;
-        color: #2dd4bf;
+        color: #1e293b;
     }
     
     /* Memaksa isi sel default (nilai 0) berwarna latar hitam/gelap */
