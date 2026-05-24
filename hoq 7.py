@@ -105,6 +105,7 @@ with t1:
 # TAB 2: Input HOWs
 with t2:
     st.subheader("Masukkan Spesifikasi Teknis (HOWs)")
+    st.caption("Pilih arah spesifikasi teknis: Max (maksimum), Min (minimum), atau Target (target).")
     st.session_state.df_hows = st.data_editor(
         st.session_state.df_hows, 
         num_rows="dynamic", 
