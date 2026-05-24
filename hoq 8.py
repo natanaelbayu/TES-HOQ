@@ -222,9 +222,9 @@ with t5:
         col_rec, col_summary = st.columns([1.2, 1])
         
         with col_rec:
-            st.success(f"✍️ **Rekomendasi Utama Bisnis Anda:**")
+            st.success(f"✍️ **Rekomendasi Utama Untuk Bisnis Anda:**")
             st.write(f"""
-            Untuk memaksimalkan kepuasan konsumen tanpa membuang-buang anggaran, fokuskan seluruh daya dan resource teknis tim Anda saat ini pada pengembangan: 
+            Untuk memaksimalkan kepuasan pelanggan tanpa membuang-buang anggaran, fokuskan seluruh biaya dan resource teknis tim Anda saat ini pada pengembangan: 
             **{priority_names[0]}**.
             
             Spesifikasi ini memegang kontribusi terbesar, yaitu sebesar **{priority_weights[0]}%** dari total seluruh ekspektasi pelanggan yang Anda masukkan.
@@ -236,7 +236,7 @@ with t5:
             if len(priority_names) > 1:
                 st.write(f"2. **Prioritas Sekunder (Pantau Berkala):** Jaga stabilitas kualitas `{priority_names[1]}`.")
             if len(priority_names) > 2:
-                st.write(f"3. **Prioritas Tersier (Pertahankan):** Lakukan pengawasan standardisasi pada `{priority_names[2]}`.")
+                st.write(f"3. **Prioritas Tersier (Pertahankan):** Lakukan pengawasan standarisasi pada `{priority_names[2]}`.")
 
         # Penjelasan sederhana bagi pelaku usaha non-teknis
         with st.expander("🔍 Bagaimana sistem menentukan arah rekomendasi ini?"):
