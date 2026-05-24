@@ -168,7 +168,7 @@ with t3:
 
 # TAB 4 (Relationship Matrix - DIBUAT USER-FRIENDLY)
 with t4:
-    st.subheader("🎯 Hubungan Kebutuhan Konsumen vs Spesifikasi Teknis")
+    st.subheader("♾️ Hubungan Kebutuhan Konsumen vs Spesifikasi Teknis")
     
     # Penjelasan interaktif agar orang awam tidak bingung dengan angka matriks QFD standar
     st.info("""
@@ -222,7 +222,7 @@ with t5:
         col_rec, col_summary = st.columns([1.2, 1])
         
         with col_rec:
-            st.success(f"🎯 **Rekomendasi Utama Bisnis Anda:**")
+            st.success(f"✍️ **Rekomendasi Utama Bisnis Anda:**")
             st.write(f"""
             Untuk memaksimalkan kepuasan konsumen tanpa membuang-buang anggaran, fokuskan seluruh daya dan resource teknis tim Anda saat ini pada pengembangan: 
             **{priority_names[0]}**.
