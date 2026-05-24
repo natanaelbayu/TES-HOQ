@@ -28,7 +28,7 @@ st.markdown("""
         color: #ffffff !important; 
     }
     
-    /* 1. Header Kepala Tabel (Satu Warna Gelap Uniform) */
+    /* Header Kepala Tabel (Satu Warna Gelap Uniform) */
     .hoq-th-corner {
         background-color: #1e293b !important;
         font-weight: 600;
@@ -45,7 +45,7 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* 2. Kolom Pertama Ke Bawah (Satu Warna Gelap Seragam) */
+    /* Kolom Pertama Ke Bawah (Satu Warna Gelap Seragam) */
     .hoq-td-whats {
         background-color: #0f172a !important;
         text-align: left !important;
@@ -58,7 +58,7 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* 3. Baris Fondasi Hasil Akhir */
+    /* Baris Fondasi Hasil Akhir */
     .hoq-score-row {
         background-color: #1e293b;
         font-weight: bold;
@@ -75,6 +75,17 @@ st.markdown("""
     .hoq-table td:not([style]) {
         background-color: #0f172a !important;
         color: #e2e8f0 !important; 
+    }
+    
+    /* Style Khusus untuk Atap Segitiga Segitiga di Tab 6 */
+    .roof-blank {
+        background-color: transparent !important;
+        border: none !important;
+    }
+    .roof-cell {
+        background-color: #1e293b;
+        border: 1px solid #475569 !important;
+        font-weight: bold;
     }
     
     /* Legend Info Box */
@@ -104,19 +115,17 @@ if 'df_hows' not in st.session_state:
         "Direction": ["Max", "Max", "Target", "Max"]
     })
 
-# --- TABS STRUKTUR ---
-t1, t2, t3, t4, t5 = st.tabs(["1. WHATs", "2. HOWs", "3. Correlation", "4. Matrix", "5. 🏆 FINAL HOUSE"])
+# --- TABS STRUKTUR (TAMBAH TAB 6) ---
+t1, t2, t3, t4, t5, t6 = st.tabs([
+    "1. WHATs", "2. HOWs", "3. Correlation", "4. Matrix", "5. 🏆 FINAL HOUSE", "🏛️ 6. FULL HOQ ARCHITECTURE"
+])
 
 # TAB 1: Input WHATs
 with t1:
     st.subheader("Masukkan Voice of Customer (WHATs)")
     st.session_state.df_whats = st.data_editor(
-        st.session_state.df_whats, 
-        num_rows="dynamic", 
-        use_container_width=True, 
-        column_config={
-            "Importance (1-5)": st.column_config.NumberColumn("Importance (1-5)", min_value=1, max_value=5, step=1)
-        },
+        st.session_state.df_whats, num_rows="dynamic", use_container_width=True, 
+        column_config={"Importance (1-5)": st.column_config.NumberColumn("Importance (1-5)", min_value=1, max_value=5, step=1)},
         key="ed_whats"
     )
 
@@ -124,12 +133,8 @@ with t1:
 with t2:
     st.subheader("Masukkan Spesifikasi Teknis (HOWs)")
     st.session_state.df_hows = st.data_editor(
-        st.session_state.df_hows, 
-        num_rows="dynamic", 
-        use_container_width=True, 
-        column_config={
-            "Direction": st.column_config.SelectboxColumn("Direction", options=["Max", "Min", "Target"], required=True)
-        },
+        st.session_state.df_hows, num_rows="dynamic", use_container_width=True, 
+        column_config={"Direction": st.column_config.SelectboxColumn("Direction", options=["Max", "Min", "Target"], required=True)},
         key="ed_hows"
     )
 
@@ -142,163 +147,4 @@ with t3:
     if 'roof_matrix' not in st.session_state or list(st.session_state.roof_matrix.columns) != hows_list:
         st.session_state.roof_matrix = pd.DataFrame("No Correlation (0)", index=hows_list, columns=hows_list)
     
-    roof_column_config = {
-        col: st.column_config.SelectboxColumn(col, options=["Strong Positive (++)", "Positive (+)", "No Correlation (0)", "Negative (-)", "Strong Negative (--)"], required=True)
-        for col in hows_list
-    }
-    st.session_state.roof_matrix = st.data_editor(st.session_state.roof_matrix, use_container_width=True, column_config=roof_column_config, key="ed_roof")
-
-# TAB 4 (Relationship Matrix)
-with t4:
-    st.subheader("Matriks Hubungan (WHATs vs HOWs)")
-    st.caption("Gunakan angka bobot matematika: 9 (Kuat), 3 (Sedang), 1 (Lemah), atau 0.")
-    if 'rel_matrix' not in st.session_state or list(st.session_state.rel_matrix.columns) != hows_list or list(st.session_state.rel_matrix.index) != whats_list:
-        st.session_state.rel_matrix = pd.DataFrame(0, index=whats_list, columns=hows_list)
-    
-    rel_column_config = {
-        col: st.column_config.SelectboxColumn(col, options=[0, 1, 3, 9], required=True)
-        for col in hows_list
-    }
-    st.session_state.rel_matrix = st.data_editor(st.session_state.rel_matrix, use_container_width=True, column_config=rel_column_config, key="ed_rel")
-
-# --- TAB 5: THE FINAL HOUSE ---
-with t5:
-    try:
-        # Perhitungan Nilai Matematika Utama
-        valid_whats = st.session_state.df_whats[st.session_state.df_whats["Customer Requirement (WHATs)"].isin(whats_list)]
-        weights = valid_whats["Importance (1-5)"].values.astype(float)
-        matrix_values = st.session_state.rel_matrix.loc[whats_list, hows_list].values.astype(float)
-        
-        abs_importance = weights @ matrix_values
-        total = abs_importance.sum()
-        rel_importance = (abs_importance / total * 100) if total > 0 else abs_importance * 0
-
-        res_df = pd.DataFrame({
-            "Requirement": hows_list,
-            "Score": abs_importance,
-            "Weight %": rel_importance.round(1)
-        }).sort_values(by="Score", ascending=False)
-
-        # Keterangan Simbol (Legend)
-        st.markdown("""
-        <div class="legend-box">
-            <strong>ℹ️ Keterangan Simbol Hubungan Matriks:</strong><br>
-            <span style="color: #38bdf8;"><strong>◎</strong> Kontribusi Kuat (Skor 9)</span> &nbsp;|&nbsp; 
-            <span style="color: #4ade80;"><strong>○</strong> Kontribusi Sedang (Skor 3)</span> &nbsp;|&nbsp; 
-            <span style="color: #fef08a;"><strong>△</strong> Kontribusi Lemah (Skor 1)</span> &nbsp;|&nbsp; 
-            <span style="color: #64748b;">Tanpa Simbol = Tidak Berhubungan (Skor 0)</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # 1. VISUALISASI MATRIKS ATAP (HOWs vs HOWs)
-        st.write("### 🛖 Bagian Atap: Matriks Korelasi Antar Persyaratan Teknis")
-        
-        html_roof = '<table class="hoq-table">'
-        html_roof += '<tr>'
-        html_roof += '<th class="hoq-th-corner" style="width: 30%;">Spesifikasi Teknis</th>'
-        for col in hows_list:
-            html_roof += f'<th class="hoq-th-hows">{col}</th>'
-        html_roof += '</tr>'
-        
-        for row_name in hows_list:
-            html_roof += '<tr>'
-            html_roof += f'<td class="hoq-td-whats">{row_name}</td>'
-            for col_name in hows_list:
-                val = st.session_state.roof_matrix.at[row_name, col_name]
-                
-                simbol = "0"
-                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
-                
-                if "Strong Positive" in val: 
-                    simbol = "++"
-                    bg_cell = 'style="background-color: #1e3a8a; color: #ffffff; font-weight: 600;"' 
-                elif "Positive" in val: 
-                    simbol = "+"
-                    bg_cell = 'style="background-color: #14532d; color: #ffffff; font-weight: 600;"' 
-                elif "Strong Negative" in val: 
-                    simbol = "--"
-                    bg_cell = 'style="background-color: #7f1d1d; color: #ffffff; font-weight: 600;"' 
-                elif "Negative" in val: 
-                    simbol = "-"
-                    bg_cell = 'style="background-color: #7c2d12; color: #ffffff; font-weight: 600;"' 
-                
-                html_roof += f'<td {bg_cell}>{simbol}</td>'
-            html_roof += '</tr>'
-        html_roof += '</table>'
-        st.markdown(html_roof, unsafe_allow_html=True)
-
-        st.write("")
-
-        # 2. VISUALISASI BADAN & FONDASI RUMAH HOQ (BERUBAH MENJADI SIMBOL)
-        st.write("### 🏢 Bagian Utama & Fondasi: Matriks Hubungan Terintegrasi")
-        
-        html_body = '<table class="hoq-table">'
-        html_body += '<tr>'
-        html_body += '<th class="hoq-th-corner" style="width: 30%;">Customer Requirements (WHATs)</th>'
-        html_body += '<th class="hoq-importance-header" style="width: 10%;">Importance</th>'
-        for col in hows_list:
-            html_body += f'<th class="hoq-th-hows">{col}</th>'
-        html_body += '</tr>'
-        
-        for idx, row_name in enumerate(whats_list):
-            imp_val = weights[idx]
-            html_body += '<tr>'
-            html_body += f'<td class="hoq-td-whats">{row_name}</td>'
-            html_body += f'<td class="hoq-importance">{int(imp_val)}</td>'
-            for col_name in hows_list:
-                score_val = st.session_state.rel_matrix.at[row_name, col_name]
-                
-                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
-                simbol_hub = ""
-                
-                if score_val == 9: 
-                    simbol_hub = "◎"
-                    bg_cell = 'style="background-color: #1e3a8a; color: #38bdf8; font-size: 18px; font-weight: bold;"' 
-                elif score_val == 3: 
-                    simbol_hub = "○"
-                    bg_cell = 'style="background-color: #1e293b; color: #4ade80; font-size: 18px; font-weight: bold;"' 
-                elif score_val == 1: 
-                    simbol_hub = "△"
-                    bg_cell = 'style="background-color: #1e293b; color: #fef08a; font-size: 18px; font-weight: bold;"' 
-                
-                html_body += f'<td {bg_cell}>{simbol_hub}</td>'
-            html_body += '</tr>'
-            
-        # Fondasi: Absolute Importance
-        html_body += '<tr class="hoq-score-row">'
-        html_body += '<td style="text-align: right; color: #38bdf8;">Absolute Importance (Score)</td>'
-        html_body += '<td style="color: #38bdf8;">-</td>'
-        for score in abs_importance:
-            html_body += f'<td style="color: #38bdf8;">{int(score)}</td>'
-        html_body += '</tr>'
-
-        # Fondasi: Relative Weight %
-        html_body += '<tr class="hoq-weight-row">'
-        html_body += '<td style="text-align: right; color: #2dd4bf;">Relative Weight (%)</td>'
-        html_body += '<td style="color: #2dd4bf;">-</td>'
-        for weight in rel_importance:
-            html_body += f'<td style="color: #2dd4bf;">{weight.round(1)}%</td>'
-        html_body += '</tr>'
-        html_body += '</table>'
-        st.markdown(html_body, unsafe_allow_html=True)
-        
-        st.write("---")
-        
-        # 3. GRID GRAFIK BAR & HIGHLIGHTS
-        col_chart, col_rank = st.columns([1.5, 1])
-        
-        with col_chart:
-            st.write("#### 📈 Grafik Kontribusi Prioritas Teknis")
-            fig = px.bar(res_df, x="Requirement", y="Score", text="Weight %",
-                         color="Score", color_continuous_scale="Blues")
-            fig.update_layout(height=400, margin=dict(t=10, b=10))
-            st.plotly_chart(fig, use_container_width=True)
-            
-        with col_rank:
-            st.write("#### 🏆 Urutan Rekomendasi Tindakan")
-            for i, row in enumerate(res_df.itertuples()):
-                medal = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else "🔹"
-                st.info(f"{medal} **{row.Requirement}** — Skor: *{int(row.Score)}* ({row._3}%)")
-
-    except Exception as e:
-        st.error("Silakan lengkapi atau periksa kembali seluruh inputan di tab sebelumnya!")
+    roof_column_config = {col: st.column_config.SelectboxColumn(col, options=
