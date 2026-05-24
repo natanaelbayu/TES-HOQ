@@ -91,6 +91,7 @@ t1, t2, t3, t4, t5 = st.tabs(["1. WHATs", "2. HOWs", "3. Correlation", "4. Matri
 # TAB 1: Input WHATs
 with t1:
     st.subheader("Masukkan Voice of Customer (WHATs)")
+    st.caption("Isi dengan bobot pentingnya dari 1 (tidak penting) hingga 5 (sangat penting).")
     st.session_state.df_whats = st.data_editor(
         st.session_state.df_whats, 
         num_rows="dynamic", 
