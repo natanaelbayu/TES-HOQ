@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # 1. SETTING HALAMAN & STYLE HOQ RUMAH
 st.set_page_config(page_title="Digital HoQ - UKM Tahu", layout="wide")
@@ -181,7 +182,7 @@ with t4:
     rel_column_config = {col: st.column_config.SelectboxColumn(col, options=[0, 1, 3, 9], required=True) for col in hows_list}
     st.session_state.rel_matrix = st.data_editor(st.session_state.rel_matrix, use_container_width=True, column_config=rel_column_config, key="ed_rel")
 
-# TAB 5: FINAL HOUSE & ACTION PLAN
+# TAB 5: FINAL HOUSE & ACTION PLAN (SUDAH INCLUDE BAR CHART DI SINI)
 with t5:
     try:
         valid_whats = st.session_state.df_whats[st.session_state.df_whats["Customer Requirement (WHATs)"].isin(whats_list)]
@@ -190,24 +191,60 @@ with t5:
         
         abs_importance = weights @ matrix_values
         total = abs_importance.sum()
-        rel_importance = (abs_importance / total * 100) if total > 0 else abs_importance * 0
-
-        res_df = pd.DataFrame({"Requirement": hows_list, "Score": abs_importance, "Weight %": rel_importance.round(1)}).sort_values(by="Score", ascending=False)
-
-        st.write("### 💡 Kesimpulan Strategis & Arah Pengembangan")
-        top_priorities = res_df.head(3)
-        priority_names = top_priorities["Requirement"].tolist()
-        priority_weights = top_priorities["Weight %"].tolist()
         
-        col_rec, col_summary = st.columns([1.2, 1])
-        with col_rec:
-            st.success(f"✍️ **Rekomendasi Utama For Business:** Fokus penuh pada **{priority_names[0]}** ({priority_weights[0]}%).")
-        with col_summary:
-            st.warning("⚠️ **Urutan Urgensi Rencana Aksi:**")
-            st.write(f"1. **Segera Eksekusi:** `{priority_names[0]}`.")
+        if total == 0:
+            st.info("💡 **Matriks Hubungan Belum Diisi:** Silakan isi nilai hubungan (1, 3, atau 9) pada **Tab 4. Matrix** terlebih dahulu untuk melihat analisis kesimpulan dan grafik prioritas strategi.")
+        else:
+            rel_importance = (abs_importance / total * 100)
+            res_df = pd.DataFrame({
+                "Technical Requirement": hows_list, 
+                "Absolute Score": abs_importance, 
+                "Relative Weight (%)": rel_importance.round(1)
+            }).sort_values(by="Absolute Score", ascending=False)
+
+            st.write("### 💡 Kesimpulan Strategis & Arah Pengembangan")
+            top_priorities = res_df.head(3)
+            priority_names = top_priorities["Technical Requirement"].tolist()
+            priority_weights = top_priorities["Relative Weight (%)"].tolist()
+            
+            col_rec, col_summary = st.columns([1.2, 1])
+            with col_rec:
+                st.success(f"✍️ **Rekomendasi Utama For Business:** Fokus penuh pada pengembangan teknis **{priority_names[0]}** yang memiliki kontribusi terbesar ({priority_weights[0]}%).")
+            with col_summary:
+                st.warning("⚠️ **Urutan Urgensi Rencana Aksi:**")
+                for rank, name in enumerate(priority_names, 1):
+                    st.write(f"{rank}. **Prioritas {rank}:** `{name}`")
+            
+            # --- PENAMBAHAN GRAFIK BAR ---
+            st.write("---")
+            st.write("### 📊 Grafik Kontribusi Prioritas Teknis (Relative Weight %)")
+            
+            # Membuat Bar Chart menggunakan Plotly Express
+            fig = px.bar(
+                res_df.sort_values(by="Relative Weight (%)", ascending=True), # Diurutkan agar yang terbesar di atas
+                x="Relative Weight (%)",
+                y="Technical Requirement",
+                orientation='h', # Grafik horizontal agar teks label terbaca jelas
+                text="Relative Weight (%)",
+                color="Relative Weight (%)",
+                color_continuous_scale="Blues"
+            )
+            
+            fig.update_traces(texttemplate='%{text}%', textposition='outside', marker_line_color='rgb(8,48,107)', marker_line_width=1.5, opacity=0.85)
+            fig.update_layout(
+                xaxis_title="Kontribusi (%)",
+                yaxis_title="Spesifikasi Teknis (HOWs)",
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color="white"),
+                showlegend=False,
+                height=350
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
-        st.error("Lengkapi data di tab sebelumnya!")
+        st.error("Silakan lengkapi input data pada tab-tab sebelumnya!")
 
 # --- 🏛️ TAB 6: FULL HOQ ARCHITECTURE (ROOF SAMPING DI SEBELAH KIRI) ---
 with t6:
@@ -225,7 +262,6 @@ with t6:
         n_whats = len(whats_list)
         n_side_cols = n_whats - 1  # Jumlah kolom untuk atap samping kiri
         
-        # Penulisan string satu baris bertingkat yang dijamin aman dari error string terputus
         legend_html = (
             '<div class="legend-box">'
             '<strong>ℹ️ Keterangan Simbol & Warna:</strong><br>'
@@ -246,13 +282,11 @@ with t6:
         # -------------------------------------------------------------
         for i in range(n_hows - 1):
             html_hoq += '<tr>'
-            # Melompati area roof samping kiri + kolom WHATs + Importance
             for _ in range(n_side_cols):
                 html_hoq += '<td class="roof-blank"></td>'
-            html_hoq += '<td class="roof-blank" style="width:250px;"></td>'  # Kolom WHATs
-            html_hoq += '<td class="roof-blank" style="width:80px;"></td>'   # Kolom Importance
+            html_hoq += '<td class="roof-blank" style="width:250px;"></td>'  
+            html_hoq += '<td class="roof-blank" style="width:80px;"></td>'   
             
-            # Isi Atap Atas
             for j in range(n_hows):
                 if j < (n_hows - 1 - i):
                     html_hoq += '<td class="roof-blank"></td>'
@@ -270,14 +304,12 @@ with t6:
                     html_hoq += f'<td class="roof-cell" style="background-color: {bg_color}; color: {text_color} !important;">{simbol}</td>'
             html_hoq += '</tr>'
 
-        # Garis pembatas tipis antara atap atas dengan kepala tabel utama
         html_hoq += '<tr><td colspan="{}" style="background-color:#334155; padding:2px; border:none;"></td></tr>'.format(n_side_cols + 2 + n_hows)
 
         # -------------------------------------------------------------
         # 2. GENERATE KEPALA TABEL BADAN UTAMA
         # -------------------------------------------------------------
         html_hoq += '<tr>'
-        # Header kolom Atap Samping Kiri
         for k in range(n_side_cols):
             html_hoq += f'<th class="side-roof-header">Korelasi L-{k+1}</th>'
             
@@ -294,7 +326,6 @@ with t6:
             imp_val = weights[idx]
             html_hoq += '<tr>'
             
-            # GENERATE CELL ROOF SAMPING KIRI
             for s_idx in range(n_side_cols):
                 target_col_idx = idx + s_idx + 1
                 if target_col_idx < n_whats:
@@ -311,11 +342,9 @@ with t6:
                 else:
                     html_hoq += '<td class="roof-blank"></td>'
             
-            # Kolom Utama WHATs dan Importance
             html_hoq += f'<td class="hoq-td-whats">{row_name}</td>'
             html_hoq += f'<td class="hoq-importance">{int(imp_val)}</td>'
             
-            # Kolom Spesifikasi Teknis (Badan Utama)
             for col_name in hows_list:
                 score_val = st.session_state.rel_matrix.at[row_name, col_name]
                 bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
@@ -335,9 +364,8 @@ with t6:
             html_hoq += '</tr>'
             
         # -------------------------------------------------------------
-        # 4. GENERATE FONDASI RUMAH HOQ (JUMLAH KIRI DISEJAJARKAN)
+        # 4. GENERATE FONDASI RUMAH HOQ
         # -------------------------------------------------------------
-        # Baris Absolute Importance
         html_hoq += '<tr class="hoq-score-row">'
         for _ in range(n_side_cols): html_hoq += '<td class="roof-blank"></td>'
         html_hoq += '<td style="text-align: right; color: #38bdf8;">Weighted Importance (Score)</td>'
@@ -346,7 +374,6 @@ with t6:
             html_hoq += f'<td style="background-color: #1e293b; color: #38bdf8 !important;">{int(score)}</td>'
         html_hoq += '</tr>'
 
-        # Baris Relative Weight (%)
         html_hoq += '<tr class="hoq-weight-row">'
         for _ in range(n_side_cols): html_hoq += '<td class="roof-blank"></td>'
         html_hoq += '<td style="text-align: right; color: #2dd4bf;">Relative Importance (%)</td>'
