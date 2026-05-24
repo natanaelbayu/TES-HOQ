@@ -25,54 +25,56 @@ st.markdown("""
         padding: 12px;
         text-align: center;
         font-size: 14px;
-        color: #f1f5f9; 
+        color: #ffffff !important; /* MEMAKSA SEMUA TEKS DEFAULT JADI PUTIH */
     }
     
-    /* 1. Header Kepala Tabel (Satu Warna Gelap Uniform) */
+    /* 1. Header Kepala Tabel (Satu Warna Gelap Uniform - Teks Putih) */
     .hoq-th-corner {
         background-color: #1e293b !important;
         font-weight: 600;
-        color: #f1f5f9 !important;
+        color: #ffffff !important;
     }
     .hoq-th-hows {
         background-color: #1e293b !important; 
-        color: #f1f5f9 !important;  
+        color: #ffffff !important;  
         font-weight: 600;
     }
     .hoq-importance-header {
         background-color: #1e293b !important;
-        color: #f1f5f9 !important;
+        color: #ffffff !important;
         font-weight: 600;
     }
     
-    /* 2. Kolom Pertama Ke Bawah (Satu Warna Gelap Seragam) */
+    /* 2. Kolom Pertama Ke Bawah (Satu Warna Gelap Seragam - Teks Putih) */
     .hoq-td-whats {
         background-color: #0f172a !important;
         text-align: left !important;
         font-weight: 600;
-        color: #f1f5f9 !important;
+        color: #ffffff !important;
     }
     .hoq-importance {
         background-color: #1e293b !important;
         font-weight: 600;
-        color: #f1f5f9 !important;
+        color: #ffffff !important;
     }
     
-    /* 3. Baris Fondasi Hasil Akhir */
+    /* 3. Baris Fondasi Hasil Akhir (Teks Putih) */
     .hoq-score-row {
         background-color: #1e293b;
         font-weight: bold;
+        color: #ffffff !important;
         border-top: 2px solid #475569;
     }
     .hoq-weight-row {
         background-color: #1e293b;
         font-weight: bold;
+        color: #ffffff !important;
     }
     
-    /* Memaksa isi sel default (nilai 0) berwarna latar gelap kontras */
+    /* Memaksa isi sel default (nilai 0) berwarna latar gelap dan TEKS PUTIH AGAK REDUP AGAR TIDAK SILAU */
     .hoq-table td:not([style]) {
         background-color: #0f172a !important;
-        color: #64748b !important;
+        color: #e2e8f0 !important; /* Putih bersih/keabuan lembut agar tetap terbaca jelas */
     }
     </style>
     """, unsafe_allow_html=True)
