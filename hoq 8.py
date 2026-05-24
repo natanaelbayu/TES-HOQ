@@ -172,7 +172,7 @@ with t4:
     
     # Penjelasan interaktif agar orang awam tidak bingung dengan angka matriks QFD standar
     st.info("""
-    💡 **Panduan Mengisi Untuk Orang Awam:**
+    💡 **Panduan :**
     Pikirkan seberapa besar pengaruh **'Spesifikasi Teknis'** dalam memenuhi **'Kebutuhan Konsumen'** Anda:
     - **9 (Kuat):** Spesifikasi ini adalah kunci utama agar kebutuhan konsumen tersebut terpenuhi.
     - **3 (Sedang):** Berpengaruh secara tidak langsung, namun bukan satu-satunya faktor penentu.
