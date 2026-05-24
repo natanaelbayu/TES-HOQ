@@ -263,4 +263,170 @@ with t5:
                 html_body += f'<td {bg_cell}>{int(score_val)}</td>'
             html_body += '</tr>'
             
-        # Fondasi
+        # Fondasi: Absolute Importance
+        html_body += '<tr class="hoq-score-row">'
+        html_body += '<td style="text-align: right; color: #38bdf8;">Absolute Importance (Score)</td>'
+        html_body += '<td style="color: #38bdf8;">-</td>'
+        for score in abs_importance:
+            html_body += f'<td style="background-color: #1e293b; color: #38bdf8 !important;">{int(score)}</td>'
+        html_body += '</tr>'
+
+        # Fondasi: Relative Weight %
+        html_body += '<tr class="hoq-weight-row">'
+        html_body += '<td style="text-align: right; color: #2dd4bf;">Relative Weight (%)</td>'
+        html_body += '<td style="color: #2dd4bf;">-</td>'
+        for weight in rel_importance:
+            html_body += f'<td style="background-color: #1e293b; color: #2dd4bf !important;">{weight.round(1)}%</td>'
+        html_body += '</tr>'
+        html_body += '</table>'
+        st.markdown(html_body, unsafe_allow_html=True)
+        
+        st.write("---")
+        
+        # 3. GRID GRAFIK BAR (VERTIRKAL)
+        col_chart, col_rank = st.columns([1.5, 1])
+        with col_chart:
+            st.write("#### 📈 Grafik Kontribusi Prioritas Teknis")
+            fig = px.bar(res_df, x="Requirement", y="Score", text="Weight %",
+                         color="Score", color_continuous_scale="Blues")
+            fig.update_layout(height=400, margin=dict(t=10, b=10))
+            st.plotly_chart(fig, use_container_width=True)
+            
+        with col_rank:
+            st.write("#### 🏆 Urutan Rekomendasi Tindakan")
+            for i, row in enumerate(res_df.itertuples()):
+                medal = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else "🔹"
+                st.info(f"{medal} **{row.Requirement}** — Skor: *{int(row.Score)}* ({row._3}%)")
+
+    except Exception as e:
+        st.error("Silakan lengkapi atau periksa kembali seluruh inputan di tab sebelumnya!")
+
+
+# --- 🏛️ BAGIAN BARU: TAB 6 (VISUALISASI FULL SEGITIGA ATAP + SIMBOL) ---
+with t6:
+    try:
+        st.write("### 🏛️ Arsitektur Matriks House of Quality (HoQ) Komplit")
+        st.caption("Visualisasi profesional mengintegrasikan Atap Korelasi Segitiga Piramida, Kriteria WHATs, serta Simbol Hubungan.")
+        
+        # Ambil kembali data perhitungan terkini
+        valid_whats = st.session_state.df_whats[st.session_state.df_whats["Customer Requirement (WHATs)"].isin(whats_list)]
+        weights = valid_whats["Importance (1-5)"].values.astype(float)
+        matrix_values = st.session_state.rel_matrix.loc[whats_list, hows_list].values.astype(float)
+        
+        abs_importance = weights @ matrix_values
+        total = abs_importance.sum()
+        rel_importance = (abs_importance / total * 100) if total > 0 else abs_importance * 0
+        
+        n_hows = len(hows_list)
+        
+        # Box Keterangan Simbol (Legend)
+        st.markdown("""
+        <div class="legend-box">
+            <strong>ℹ️ Keterangan Simbol Hubungan Matriks (Badan Utama):</strong><br>
+            <span style="color: #38bdf8;"><strong>◎</strong> Kontribusi Kuat (Skor 9)</span> &nbsp;|&nbsp; 
+            <span style="color: #4ade80;"><strong>○</strong> Kontribusi Sedang (Skor 3)</span> &nbsp;|&nbsp; 
+            <span style="color: #fef08a;"><strong>△</strong> Kontribusi Lemah (Skor 1)</span> &nbsp;|&nbsp; 
+            <span style="color: #64748b;">Tanpa Simbol = Tidak Berhubungan (Skor 0)</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Mulai membangun struktur arsitektur tabel HTML gabungan besar
+        html_hoq = '<table class="hoq-table" style="width:auto; margin:auto;">'
+        
+        # -------------------------------------------------------------
+        # 1. GENERATE ATAP SEGITIGA (Roof Matrix Upper Triangle)
+        # -------------------------------------------------------------
+        for i in range(n_hows - 1):
+            html_hoq += '<tr>'
+            # Membuat space kosong transparan di kiri (sejajar kolom WHATs dan Importance)
+            html_hoq += '<td class="roof-blank" style="width:250px;"></td>'
+            html_hoq += '<td class="roof-blank" style="width:80px;"></td>'
+            
+            for j in range(n_hows):
+                # Membentuk diagonal segitiga atas berundak ke kanan
+                if j < (n_hows - 1 - i):
+                    html_hoq += '<td class="roof-blank"></td>'
+                else:
+                    row_target = hows_list[j]
+                    col_target = hows_list[n_hows - 1 - i]
+                    val = st.session_state.roof_matrix.at[row_target, col_target]
+                    
+                    simbol = ""
+                    bg_color = "#1e293b"
+                    text_color = "#64748b"
+                    
+                    if "Strong Positive" in val: simbol, bg_color, text_color = "++", "#1e3a8a", "#38bdf8"
+                    elif "Positive" in val: simbol, bg_color, text_color = "+", "#14532d", "#4ade80"
+                    elif "Strong Negative" in val: simbol, bg_color, text_color = "--", "#7f1d1d", "#f87171"
+                    elif "Negative" in val: simbol, bg_color, text_color = "-", "#7c2d12", "#fb923c"
+                    elif "No Correlation" in val: simbol, bg_color, text_color = "0", "#0f172a", "#475569"
+                    
+                    html_hoq += f'<td class="roof-cell" style="background-color: {bg_color}; color: {text_color} !important;">{simbol}</td>'
+            html_hoq += '</tr>'
+
+        # Garis pembatas tipis antara atap segitiga dengan kepala tabel utama
+        html_hoq += '<tr><td colspan="{}" style="background-color:#334155; padding:2px; border:none;"></td></tr>'.format(n_hows + 2)
+
+        # -------------------------------------------------------------
+        # 2. GENERATE KEPALA TABEL BADAN UTAMA
+        # -------------------------------------------------------------
+        html_hoq += '<tr>'
+        html_hoq += '<th class="hoq-th-corner">Customer Requirements (WHATs)</th>'
+        html_hoq += '<th class="hoq-importance-header">Importance</th>'
+        for col in hows_list:
+            html_hoq += f'<th class="hoq-th-hows">{col}</th>'
+        html_hoq += '</tr>'
+        
+        # -------------------------------------------------------------
+        # 3. GENERATE BADAN MATRIKS UTAMA (MENGGUNAKAN SIMBOL ◎, ○, △)
+        # -------------------------------------------------------------
+        for idx, row_name in enumerate(whats_list):
+            imp_val = weights[idx]
+            html_hoq += '<tr>'
+            html_hoq += f'<td class="hoq-td-whats">{row_name}</td>'
+            html_hoq += f'<td class="hoq-importance">{int(imp_val)}</td>'
+            for col_name in hows_list:
+                score_val = st.session_state.rel_matrix.at[row_name, col_name]
+                
+                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
+                simbol_hub = ""
+                
+                if score_val == 9: 
+                    simbol_hub = "◎"
+                    bg_cell = 'style="background-color: #1e3a8a; color: #38bdf8; font-size: 18px; font-weight: bold;"' 
+                elif score_val == 3: 
+                    simbol_hub = "○"
+                    bg_cell = 'style="background-color: #1e293b; color: #4ade80; font-size: 18px; font-weight: bold;"' 
+                elif score_val == 1: 
+                    simbol_hub = "△"
+                    bg_cell = 'style="background-color: #1e293b; color: #fef08a; font-size: 18px; font-weight: bold;"' 
+                
+                html_hoq += f'<td {bg_cell}>{simbol_hub}</td>'
+            html_hoq += '</tr>'
+            
+        # -------------------------------------------------------------
+        # 4. GENERATE FONDASI RUMAH HOQ (MUTED SCORE & WEIGHTS)
+        # -------------------------------------------------------------
+        # Baris Absolute Importance (Score)
+        html_hoq += '<tr class="hoq-score-row">'
+        html_hoq += '<td style="text-align: right; color: #38bdf8;">Absolute Importance (Score)</td>'
+        html_hoq += '<td style="color: #38bdf8;">-</td>'
+        for score in abs_importance:
+            html_hoq += f'<td style="background-color: #1e293b; color: #38bdf8 !important;">{int(score)}</td>'
+        html_hoq += '</tr>'
+
+        # Baris Relative Weight (%)
+        html_hoq += '<tr class="hoq-weight-row">'
+        html_hoq += '<td style="text-align: right; color: #2dd4bf;">Relative Weight (%)</td>'
+        html_hoq += '<td style="color: #2dd4bf;">-</td>'
+        for weight in rel_importance:
+            html_hoq += f'<td style="background-color: #1e293b; color: #2dd4bf !important;">{weight.round(1)}%</td>'
+        html_hoq += '</tr>'
+        
+        html_hoq += '</table>'
+        
+        # Render arsitektur bangunan rumah penuh ke screen
+        st.markdown(html_hoq, unsafe_allow_html=True)
+        
+    except Exception as e:
+        st.error("Silakan pastikan semua data pada input Tab 1 sampai 4 diisi dengan benar.")
