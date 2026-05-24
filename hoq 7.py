@@ -25,10 +25,10 @@ st.markdown("""
         padding: 12px;
         text-align: center;
         font-size: 14px;
-        color: #ffffff !important; /* MEMAKSA SEMUA TEKS DEFAULT JADI PUTIH */
+        color: #ffffff !important; 
     }
     
-    /* 1. Header Kepala Tabel (Satu Warna Gelap Uniform - Teks Putih) */
+    /* 1. Header Kepala Tabel (Satu Warna Gelap Uniform) */
     .hoq-th-corner {
         background-color: #1e293b !important;
         font-weight: 600;
@@ -45,7 +45,7 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* 2. Kolom Pertama Ke Bawah (Satu Warna Gelap Seragam - Teks Putih) */
+    /* 2. Kolom Pertama Ke Bawah (Satu Warna Gelap Seragam) */
     .hoq-td-whats {
         background-color: #0f172a !important;
         text-align: left !important;
@@ -58,7 +58,7 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* 3. Baris Fondasi Hasil Akhir (Teks Putih) */
+    /* 3. Baris Fondasi Hasil Akhir */
     .hoq-score-row {
         background-color: #1e293b;
         font-weight: bold;
@@ -71,10 +71,19 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Memaksa isi sel default (nilai 0) berwarna latar gelap dan TEKS PUTIH AGAK REDUP AGAR TIDAK SILAU */
+    /* Memaksa isi sel default berwarna latar gelap */
     .hoq-table td:not([style]) {
         background-color: #0f172a !important;
-        color: #e2e8f0 !important; /* Putih bersih/keabuan lembut agar tetap terbaca jelas */
+        color: #e2e8f0 !important; 
+    }
+    
+    /* Legend Info Box */
+    .legend-box {
+        background-color: #1e293b;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        margin-bottom: 15px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -101,7 +110,6 @@ t1, t2, t3, t4, t5 = st.tabs(["1. WHATs", "2. HOWs", "3. Correlation", "4. Matri
 # TAB 1: Input WHATs
 with t1:
     st.subheader("Masukkan Voice of Customer (WHATs)")
-    st.caption("Isi dengan bobot pentingnya dari 1 (tidak penting) hingga 5 (sangat penting).")
     st.session_state.df_whats = st.data_editor(
         st.session_state.df_whats, 
         num_rows="dynamic", 
@@ -115,7 +123,6 @@ with t1:
 # TAB 2: Input HOWs
 with t2:
     st.subheader("Masukkan Spesifikasi Teknis (HOWs)")
-    st.caption("Pilih arah spesifikasi teknis: Max (maksimum), Min (minimum), atau Target (target).")
     st.session_state.df_hows = st.data_editor(
         st.session_state.df_hows, 
         num_rows="dynamic", 
@@ -126,14 +133,12 @@ with t2:
         key="ed_hows"
     )
 
-# Filter list dinamis dari apa yang diinput user
 whats_list = [x for x in st.session_state.df_whats["Customer Requirement (WHATs)"].tolist() if pd.notna(x) and x != ""]
 hows_list = [x for x in st.session_state.df_hows["Technical Requirement (HOWs)"].tolist() if pd.notna(x) and x != ""]
 
-# TAB 3 (Correlation - The Roof)
+# TAB 3 (Correlation)
 with t3:
     st.subheader("Matriks Korelasi Atap (HOWs vs HOWs)")
-    st.caption("Pilih nilai korelasi antar spesifikasi teknis")
     if 'roof_matrix' not in st.session_state or list(st.session_state.roof_matrix.columns) != hows_list:
         st.session_state.roof_matrix = pd.DataFrame("No Correlation (0)", index=hows_list, columns=hows_list)
     
@@ -146,7 +151,7 @@ with t3:
 # TAB 4 (Relationship Matrix)
 with t4:
     st.subheader("Matriks Hubungan (WHATs vs HOWs)")
-    st.caption("Pilih nilai hubungan: 9 (Kuat), 3 (Sedang), 1 (Lemah), atau 0 jika tidak berhubungan.")
+    st.caption("Gunakan angka bobot matematika: 9 (Kuat), 3 (Sedang), 1 (Lemah), atau 0.")
     if 'rel_matrix' not in st.session_state or list(st.session_state.rel_matrix.columns) != hows_list or list(st.session_state.rel_matrix.index) != whats_list:
         st.session_state.rel_matrix = pd.DataFrame(0, index=whats_list, columns=hows_list)
     
@@ -168,16 +173,24 @@ with t5:
         total = abs_importance.sum()
         rel_importance = (abs_importance / total * 100) if total > 0 else abs_importance * 0
 
-        # DataFrame Hasil Akhir untuk Chart
         res_df = pd.DataFrame({
             "Requirement": hows_list,
             "Score": abs_importance,
             "Weight %": rel_importance.round(1)
         }).sort_values(by="Score", ascending=False)
 
-        # -------------------------------------------------------------
+        # Keterangan Simbol (Legend)
+        st.markdown("""
+        <div class="legend-box">
+            <strong>ℹ️ Keterangan Simbol Hubungan Matriks:</strong><br>
+            <span style="color: #38bdf8;"><strong>◎</strong> Kontribusi Kuat (Skor 9)</span> &nbsp;|&nbsp; 
+            <span style="color: #4ade80;"><strong>○</strong> Kontribusi Sedang (Skor 3)</span> &nbsp;|&nbsp; 
+            <span style="color: #fef08a;"><strong>△</strong> Kontribusi Lemah (Skor 1)</span> &nbsp;|&nbsp; 
+            <span style="color: #64748b;">Tanpa Simbol = Tidak Berhubungan (Skor 0)</span>
+        </div>
+        """, unsafe_allow_html=True)
+
         # 1. VISUALISASI MATRIKS ATAP (HOWs vs HOWs)
-        # -------------------------------------------------------------
         st.write("### 🛖 Bagian Atap: Matriks Korelasi Antar Persyaratan Teknis")
         
         html_roof = '<table class="hoq-table">'
@@ -194,20 +207,20 @@ with t5:
                 val = st.session_state.roof_matrix.at[row_name, col_name]
                 
                 simbol = "0"
-                bg_cell = 'style="background-color: #0f172a; color: #64748b;"' # Gelap jika 0
+                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
                 
                 if "Strong Positive" in val: 
                     simbol = "++"
-                    bg_cell = 'style="background-color: #1e3a8a; color: #38bdf8; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #1e3a8a; color: #ffffff; font-weight: 600;"' 
                 elif "Positive" in val: 
                     simbol = "+"
-                    bg_cell = 'style="background-color: #14532d; color: #4ade80; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #14532d; color: #ffffff; font-weight: 600;"' 
                 elif "Strong Negative" in val: 
                     simbol = "--"
-                    bg_cell = 'style="background-color: #7f1d1d; color: #f87171; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #7f1d1d; color: #ffffff; font-weight: 600;"' 
                 elif "Negative" in val: 
                     simbol = "-"
-                    bg_cell = 'style="background-color: #7c2d12; color: #fb923c; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #7c2d12; color: #ffffff; font-weight: 600;"' 
                 
                 html_roof += f'<td {bg_cell}>{simbol}</td>'
             html_roof += '</tr>'
@@ -216,9 +229,7 @@ with t5:
 
         st.write("")
 
-        # -------------------------------------------------------------
-        # 2. VISUALISASI BADAN & FONDASI RUMAH HOQ
-        # -------------------------------------------------------------
+        # 2. VISUALISASI BADAN & FONDASI RUMAH HOQ (BERUBAH MENJADI SIMBOL)
         st.write("### 🏢 Bagian Utama & Fondasi: Matriks Hubungan Terintegrasi")
         
         html_body = '<table class="hoq-table">'
@@ -238,12 +249,19 @@ with t5:
                 score_val = st.session_state.rel_matrix.at[row_name, col_name]
                 
                 bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
+                simbol_hub = ""
                 
-                if score_val == 9: bg_cell = 'style="background-color: #881337; color: #fda4af; font-weight: 600;"' 
-                elif score_val == 3: bg_cell = 'style="background-color: #7c2d12; color: #fed7aa;"' 
-                elif score_val == 1: bg_cell = 'style="background-color: #713f12; color: #fef08a;"' 
+                if score_val == 9: 
+                    simbol_hub = "◎"
+                    bg_cell = 'style="background-color: #1e3a8a; color: #38bdf8; font-size: 18px; font-weight: bold;"' 
+                elif score_val == 3: 
+                    simbol_hub = "○"
+                    bg_cell = 'style="background-color: #1e293b; color: #4ade80; font-size: 18px; font-weight: bold;"' 
+                elif score_val == 1: 
+                    simbol_hub = "△"
+                    bg_cell = 'style="background-color: #1e293b; color: #fef08a; font-size: 18px; font-weight: bold;"' 
                 
-                html_body += f'<td {bg_cell}>{int(score_val)}</td>'
+                html_body += f'<td {bg_cell}>{simbol_hub}</td>'
             html_body += '</tr>'
             
         # Fondasi: Absolute Importance
@@ -266,14 +284,11 @@ with t5:
         
         st.write("---")
         
-        # -------------------------------------------------------------
-        # 3. GRID GRAFIK BAR (VERTIRKAL / BERDIRI) & HIGHLIGHTS
-        # -------------------------------------------------------------
+        # 3. GRID GRAFIK BAR & HIGHLIGHTS
         col_chart, col_rank = st.columns([1.5, 1])
         
         with col_chart:
             st.write("#### 📈 Grafik Kontribusi Prioritas Teknis")
-            # Mengubah orientasi menjadi vertikal (menghapus orientation='h', tukar x dan y)
             fig = px.bar(res_df, x="Requirement", y="Score", text="Weight %",
                          color="Score", color_continuous_scale="Blues")
             fig.update_layout(height=400, margin=dict(t=10, b=10))
