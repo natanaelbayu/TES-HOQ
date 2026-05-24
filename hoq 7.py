@@ -123,6 +123,7 @@ hows_list = [x for x in st.session_state.df_hows["Technical Requirement (HOWs)"]
 # TAB 3 (Correlation - The Roof)
 with t3:
     st.subheader("Matriks Korelasi Atap (HOWs vs HOWs)")
+    st.caption("Pilih nilai korelasi antar spesifikasi teknis")
     if 'roof_matrix' not in st.session_state or list(st.session_state.roof_matrix.columns) != hows_list:
         st.session_state.roof_matrix = pd.DataFrame("No Correlation (0)", index=hows_list, columns=hows_list)
     
@@ -135,6 +136,7 @@ with t3:
 # TAB 4 (Relationship Matrix)
 with t4:
     st.subheader("Matriks Hubungan (WHATs vs HOWs)")
+    st.caption("Pilih nilai hubungan: 9 (Kuat), 3 (Sedang), 1 (Lemah), atau 0 jika tidak berhubungan.")
     if 'rel_matrix' not in st.session_state or list(st.session_state.rel_matrix.columns) != hows_list or list(st.session_state.rel_matrix.index) != whats_list:
         st.session_state.rel_matrix = pd.DataFrame(0, index=whats_list, columns=hows_list)
     
