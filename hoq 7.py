@@ -10,7 +10,7 @@ st.markdown("""
     .main-header { font-size: 28px; font-weight: bold; color: #38bdf8; margin-bottom: 10px; }
     .sub-header { font-size: 18px; color: #94a3b8; margin-bottom: 20px; }
     
-    /* Style Tabel Rumah HoQ untuk Tema Gelap (Dark Mode) Uniform */
+    /* Style Tabel Rumah HoQ untuk Tema Gelap (Dark Mode) */
     .hoq-table {
         border-collapse: collapse;
         margin: 20px 0;
@@ -18,17 +18,15 @@ st.markdown("""
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
-        background-color: #0f172a; /* Background dasar tabel gelap */
+        background-color: #0f172a; /* Background dasar tabel gelap modern */
     }
     .hoq-table th, .hoq-table td {
         border: 1px solid #334155;
         padding: 12px;
         text-align: center;
         font-size: 14px;
-        color: #ffffff !important; /* MEMAKSA SEMUA TEKS DEFAULT JADI PUTIH */
+        color: #ffffff !important; /* Memaksa teks default tetap putih cerah */
     }
-    
-    /* 1. Header Kepala Tabel (Satu Warna Gelap Uniform - Teks Putih) */
     .hoq-th-corner {
         background-color: #1e293b !important;
         font-weight: 600;
@@ -44,8 +42,6 @@ st.markdown("""
         color: #ffffff !important;
         font-weight: 600;
     }
-    
-    /* 2. Kolom Pertama Ke Bawah (Satu Warna Gelap Seragam - Teks Putih) */
     .hoq-td-whats {
         background-color: #0f172a !important;
         text-align: left !important;
@@ -57,8 +53,6 @@ st.markdown("""
         font-weight: 600;
         color: #ffffff !important;
     }
-    
-    /* 3. Baris Fondasi Hasil Akhir (Teks Putih) */
     .hoq-score-row {
         background-color: #1e293b;
         font-weight: bold;
@@ -71,10 +65,30 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Memaksa isi sel default (nilai 0) berwarna latar gelap dan TEKS PUTIH AGAK REDUP AGAR TIDAK SILAU */
+    /* Memaksa isi sel default (nilai 0) berwarna latar hitam/gelap */
     .hoq-table td:not([style]) {
         background-color: #0f172a !important;
-        color: #e2e8f0 !important; /* Putih bersih/keabuan lembut agar tetap terbaca jelas */
+        color: #e2e8f0 !important;
+    }
+    
+    /* Style Khusus untuk Atap Segitiga Segitiga di Tab 6 */
+    .roof-blank {
+        background-color: transparent !important;
+        border: none !important;
+    }
+    .roof-cell {
+        background-color: #1e293b;
+        border: 1px solid #475569 !important;
+        font-weight: bold;
+    }
+    
+    /* Legend Info Box */
+    .legend-box {
+        background-color: #1e293b;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        margin-bottom: 15px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -95,8 +109,10 @@ if 'df_hows' not in st.session_state:
         "Direction": ["Max", "Max", "Target", "Max"]
     })
 
-# --- TABS STRUKTUR ---
-t1, t2, t3, t4, t5 = st.tabs(["1. WHATs", "2. HOWs", "3. Correlation", "4. Matrix", "5. 🏆 FINAL HOUSE"])
+# --- TABS STRUKTUR (MENAMBAHKAN TAB 6) ---
+t1, t2, t3, t4, t5, t6 = st.tabs([
+    "1. WHATs", "2. HOWs", "3. Correlation", "4. Matrix", "5. 🏆 FINAL HOUSE", "🏛️ 6. FULL HOQ ARCHITECTURE"
+])
 
 # TAB 1: Input WHATs
 with t1:
@@ -156,7 +172,8 @@ with t4:
     }
     st.session_state.rel_matrix = st.data_editor(st.session_state.rel_matrix, use_container_width=True, column_config=rel_column_config, key="ed_rel")
 
-# --- TAB 5: THE FINAL HOUSE ---
+
+# --- TAB 5: THE FINAL HOUSE (GAUSAH DIUBAH - TETAP MENGGUNAKAN TAMPILAN LAMA ANDA) ---
 with t5:
     try:
         # Perhitungan Nilai Matematika Utama
@@ -176,7 +193,7 @@ with t5:
         }).sort_values(by="Score", ascending=False)
 
         # -------------------------------------------------------------
-        # 1. VISUALISASI MATRIKS ATAP (HOWs vs HOWs)
+        # 1. VISUALISASI MATRIKS ATAP (HOWs vs HOWs) - VERSI LAMA
         # -------------------------------------------------------------
         st.write("### 🛖 Bagian Atap: Matriks Korelasi Antar Persyaratan Teknis")
         
@@ -194,20 +211,20 @@ with t5:
                 val = st.session_state.roof_matrix.at[row_name, col_name]
                 
                 simbol = "0"
-                bg_cell = 'style="background-color: #0f172a; color: #64748b;"' # Gelap jika 0
+                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
                 
                 if "Strong Positive" in val: 
                     simbol = "++"
-                    bg_cell = 'style="background-color: #1e3a8a; color: #38bdf8; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #1e3a8a; color: #ffffff; font-weight: 600;"' 
                 elif "Positive" in val: 
                     simbol = "+"
-                    bg_cell = 'style="background-color: #14532d; color: #4ade80; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #14532d; color: #ffffff; font-weight: 600;"' 
                 elif "Strong Negative" in val: 
                     simbol = "--"
-                    bg_cell = 'style="background-color: #7f1d1d; color: #f87171; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #7f1d1d; color: #ffffff; font-weight: 600;"' 
                 elif "Negative" in val: 
                     simbol = "-"
-                    bg_cell = 'style="background-color: #7c2d12; color: #fb923c; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #7c2d12; color: #ffffff; font-weight: 600;"' 
                 
                 html_roof += f'<td {bg_cell}>{simbol}</td>'
             html_roof += '</tr>'
@@ -217,7 +234,7 @@ with t5:
         st.write("")
 
         # -------------------------------------------------------------
-        # 2. VISUALISASI BADAN & FONDASI RUMAH HOQ
+        # 2. VISUALISASI BADAN & FONDASI RUMAH HOQ - VERSI LAMA (ANGKA)
         # -------------------------------------------------------------
         st.write("### 🏢 Bagian Utama & Fondasi: Matriks Hubungan Terintegrasi")
         
@@ -239,51 +256,11 @@ with t5:
                 
                 bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
                 
-                if score_val == 9: bg_cell = 'style="background-color: #881337; color: #fda4af; font-weight: 600;"' 
-                elif score_val == 3: bg_cell = 'style="background-color: #7c2d12; color: #fed7aa;"' 
-                elif score_val == 1: bg_cell = 'style="background-color: #713f12; color: #fef08a;"' 
+                if score_val == 9: bg_cell = 'style="background-color: #881337; color: #ffffff; font-weight: 600;"' 
+                elif score_val == 3: bg_cell = 'style="background-color: #7c2d12; color: #ffffff; font-weight: 600;"' 
+                elif score_val == 1: bg_cell = 'style="background-color: #713f12; color: #ffffff; font-weight: 600;"' 
                 
                 html_body += f'<td {bg_cell}>{int(score_val)}</td>'
             html_body += '</tr>'
             
-        # Fondasi: Absolute Importance
-        html_body += '<tr class="hoq-score-row">'
-        html_body += '<td style="text-align: right; color: #38bdf8;">Absolute Importance (Score)</td>'
-        html_body += '<td style="color: #38bdf8;">-</td>'
-        for score in abs_importance:
-            html_body += f'<td style="color: #38bdf8;">{int(score)}</td>'
-        html_body += '</tr>'
-
-        # Fondasi: Relative Weight %
-        html_body += '<tr class="hoq-weight-row">'
-        html_body += '<td style="text-align: right; color: #2dd4bf;">Relative Weight (%)</td>'
-        html_body += '<td style="color: #2dd4bf;">-</td>'
-        for weight in rel_importance:
-            html_body += f'<td style="color: #2dd4bf;">{weight.round(1)}%</td>'
-        html_body += '</tr>'
-        html_body += '</table>'
-        st.markdown(html_body, unsafe_allow_html=True)
-        
-        st.write("---")
-        
-        # -------------------------------------------------------------
-        # 3. GRID GRAFIK BAR (VERTIRKAL / BERDIRI) & HIGHLIGHTS
-        # -------------------------------------------------------------
-        col_chart, col_rank = st.columns([1.5, 1])
-        
-        with col_chart:
-            st.write("#### 📈 Grafik Kontribusi Prioritas Teknis")
-            # Mengubah orientasi menjadi vertikal (menghapus orientation='h', tukar x dan y)
-            fig = px.bar(res_df, x="Requirement", y="Score", text="Weight %",
-                         color="Score", color_continuous_scale="Blues")
-            fig.update_layout(height=400, margin=dict(t=10, b=10))
-            st.plotly_chart(fig, use_container_width=True)
-            
-        with col_rank:
-            st.write("#### 🏆 Urutan Rekomendasi Tindakan")
-            for i, row in enumerate(res_df.itertuples()):
-                medal = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else "🔹"
-                st.info(f"{medal} **{row.Requirement}** — Skor: *{int(row.Score)}* ({row._3}%)")
-
-    except Exception as e:
-        st.error("Silakan lengkapi atau periksa kembali seluruh inputan di tab sebelumnya!")
+        # Fondasi
