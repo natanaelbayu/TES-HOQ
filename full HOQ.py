@@ -125,4 +125,240 @@ if 'df_hows' not in st.session_state:
     })
 
 whats_list = [x for x in st.session_state.df_whats["Customer Requirement (WHATs)"].tolist() if pd.notna(x) and x != ""]
-hows_list = [x for x in st.session_state.df_hows["Technical Requirement (HOWs)"].tolist
+hows_list = [x for x in st.session_state.df_hows["Technical Requirement (HOWs)"].tolist() if pd.notna(x) and x != ""]
+
+# Inisialisasi Matriks Korelasi Samping (WHATs vs WHATs)
+if 'whats_roof_matrix' not in st.session_state or list(st.session_state.whats_roof_matrix.columns) != whats_list:
+    st.session_state.whats_roof_matrix = pd.DataFrame("No Correlation (0)", index=whats_list, columns=whats_list)
+
+# --- TABS STRUKTUR ---
+t1, t2, t3, t4, t5, t6 = st.tabs([
+    "1. WHATs", "2. HOWs", "3. Correlation (Top & Side)", "4. Matrix", "5. 🏆 FINAL HOUSE & ACTION PLAN", "🏛️ 6. FULL HOQ ARCHITECTURE"
+])
+
+# TAB 1: Input WHATs
+with t1:
+    st.subheader("Masukkan Voice of Customer (WHATs)")
+    st.session_state.df_whats = st.data_editor(
+        st.session_state.df_whats, num_rows="dynamic", use_container_width=True, 
+        column_config={"Importance (1-5)": st.column_config.NumberColumn("Importance (1-5)", min_value=1, max_value=5, step=1)},
+        key="ed_whats"
+    )
+
+# TAB 2: Input HOWs
+with t2:
+    st.subheader("Masukkan Spesifikasi Teknis (HOWs)")
+    st.session_state.df_hows = st.data_editor(
+        st.session_state.df_hows, num_rows="dynamic", use_container_width=True, 
+        column_config={"Direction": st.column_config.SelectboxColumn("Direction", options=["Max", "Min", "Target"], required=True)},
+        key="ed_hows"
+    )
+
+# TAB 3: Correlation (Atap Atas & Samping Kiri)
+with t3:
+    col_roof_side, col_roof_top = st.columns(2)
+    
+    with col_roof_side:
+        st.subheader("📐 Matriks Atap Samping Kiri (WHATs vs WHATs)")
+        st.caption("Pilih nilai hubungan korelasi antar kebutuhan pelanggan (WHATs).")
+        whats_roof_config = {col: st.column_config.SelectboxColumn(col, options=["Strong Positive (++)", "Positive (+)", "No Correlation (0)", "Negative (-)", "Strong Negative (--)"], required=True) for col in whats_list}
+        st.session_state.whats_roof_matrix = st.data_editor(st.session_state.whats_roof_matrix, use_container_width=True, column_config=whats_roof_config, key="ed_whats_roof")
+
+    with col_roof_top:
+        st.subheader("🛖 Matriks Atap Atas (HOWs vs HOWs)")
+        if 'roof_matrix' not in st.session_state or list(st.session_state.roof_matrix.columns) != hows_list:
+            st.session_state.roof_matrix = pd.DataFrame("No Correlation (0)", index=hows_list, columns=hows_list)
+        
+        roof_column_config = {col: st.column_config.SelectboxColumn(col, options=["Strong Positive (++)", "Positive (+)", "No Correlation (0)", "Negative (-)", "Strong Negative (--)"], required=True) for col in hows_list}
+        st.session_state.roof_matrix = st.data_editor(st.session_state.roof_matrix, use_container_width=True, column_config=roof_column_config, key="ed_roof")
+
+# TAB 4: Relationship Matrix
+with t4:
+    st.subheader("♾️ Hubungan Kebutuhan Konsumen vs Spesifikasi Teknis")
+    if 'rel_matrix' not in st.session_state or list(st.session_state.rel_matrix.columns) != hows_list or list(st.session_state.rel_matrix.index) != whats_list:
+        st.session_state.rel_matrix = pd.DataFrame(0, index=whats_list, columns=hows_list)
+    
+    rel_column_config = {col: st.column_config.SelectboxColumn(col, options=[0, 1, 3, 9], required=True) for col in hows_list}
+    st.session_state.rel_matrix = st.data_editor(st.session_state.rel_matrix, use_container_width=True, column_config=rel_column_config, key="ed_rel")
+
+# TAB 5: FINAL HOUSE & ACTION PLAN
+with t5:
+    try:
+        valid_whats = st.session_state.df_whats[st.session_state.df_whats["Customer Requirement (WHATs)"].isin(whats_list)]
+        weights = valid_whats["Importance (1-5)"].values.astype(float)
+        matrix_values = st.session_state.rel_matrix.loc[whats_list, hows_list].values.astype(float)
+        
+        abs_importance = weights @ matrix_values
+        total = abs_importance.sum()
+        rel_importance = (abs_importance / total * 100) if total > 0 else abs_importance * 0
+
+        res_df = pd.DataFrame({"Requirement": hows_list, "Score": abs_importance, "Weight %": rel_importance.round(1)}).sort_values(by="Score", ascending=False)
+
+        st.write("### 💡 Kesimpulan Strategis & Arah Pengembangan")
+        top_priorities = res_df.head(3)
+        priority_names = top_priorities["Requirement"].tolist()
+        priority_weights = top_priorities["Weight %"].tolist()
+        
+        col_rec, col_summary = st.columns([1.2, 1])
+        with col_rec:
+            st.success(f"✍️ **Rekomendasi Utama For Business:** Fokus penuh pada **{priority_names[0]}** ({priority_weights[0]}%).")
+        with col_summary:
+            st.warning("⚠️ **Urutan Urgensi Rencana Aksi:**")
+            st.write(f"1. **Segera Eksekusi:** `{priority_names[0]}`.")
+
+    except Exception as e:
+        st.error("Lengkapi data di tab sebelumnya!")
+
+# --- 🏛️ TAB 6: FULL HOQ ARCHITECTURE (ROOF SAMPING DI SEBELAH KIRI) ---
+with t6:
+    try:
+        st.write("### 🏛️ Arsitektur Matriks House of Quality (HoQ) Komplit + Roof Kiri")
+        
+        valid_whats = st.session_state.df_whats[st.session_state.df_whats["Customer Requirement (WHATs)"].isin(whats_list)]
+        weights = valid_whats["Importance (1-5)"].values.astype(float)
+        matrix_values = st.session_state.rel_matrix.loc[whats_list, hows_list].values.astype(float)
+        abs_importance = weights @ matrix_values
+        total = abs_importance.sum()
+        rel_importance = (abs_importance / total * 100) if total > 0 else abs_importance * 0
+        
+        n_hows = len(hows_list)
+        n_whats = len(whats_list)
+        n_side_cols = n_whats - 1  # Jumlah kolom untuk atap samping kiri
+        
+        # Penulisan string satu baris bertingkat yang dijamin aman dari error string terputus
+        legend_html = (
+            '<div class="legend-box">'
+            '<strong>ℹ️ Keterangan Simbol & Warna:</strong><br>'
+            '<span><strong>◎</strong> Kuat (9) | <strong>○</strong> Sedang (3) | <strong>△</strong> Lemah (1)</span><br>'
+            '<span style="border: 1px solid #475569; padding: 2px 5px; background-color: #1e3a8a;">++</span> Strong Positive &nbsp;|&nbsp; '
+            '<span style="border: 1px solid #475569; padding: 2px 5px; background-color: #14532d;">+</span> Positive &nbsp;|&nbsp; '
+            '<span style="border: 1px solid #475569; padding: 2px 5px; background-color: #7c2d12;">-</span> Negative &nbsp;|&nbsp; '
+            '<span style="border: 1px solid #475569; padding: 2px 5px; background-color: #7f1d1d;">--</span> Strong Negative'
+            '</div>'
+        )
+        st.markdown(legend_html, unsafe_allow_html=True)
+        
+        html_hoq = '<div class="hoq-scroll-container">'
+        html_hoq += '<table class="hoq-table" style="width:auto; margin:auto;">'
+        
+        # -------------------------------------------------------------
+        # 1. GENERATE ATAP ATAS (HOWs vs HOWs)
+        # -------------------------------------------------------------
+        for i in range(n_hows - 1):
+            html_hoq += '<tr>'
+            # Melompati area roof samping kiri + kolom WHATs + Importance
+            for _ in range(n_side_cols):
+                html_hoq += '<td class="roof-blank"></td>'
+            html_hoq += '<td class="roof-blank" style="width:250px;"></td>'  # Kolom WHATs
+            html_hoq += '<td class="roof-blank" style="width:80px;"></td>'   # Kolom Importance
+            
+            # Isi Atap Atas
+            for j in range(n_hows):
+                if j < (n_hows - 1 - i):
+                    html_hoq += '<td class="roof-blank"></td>'
+                else:
+                    row_target = hows_list[j]
+                    col_target = hows_list[n_hows - 1 - i]
+                    val = st.session_state.roof_matrix.at[row_target, col_target]
+                    
+                    simbol, bg_color, text_color = "0", "#0f172a", "#475569"
+                    if "Strong Positive" in val: simbol, bg_color, text_color = "++", "#1e3a8a", "#38bdf8"
+                    elif "Positive" in val: simbol, bg_color, text_color = "+", "#14532d", "#4ade80"
+                    elif "Strong Negative" in val: simbol, bg_color, text_color = "--", "#7f1d1d", "#f87171"
+                    elif "Negative" in val: simbol, bg_color, text_color = "-", "#7c2d12", "#fb923c"
+                    
+                    html_hoq += f'<td class="roof-cell" style="background-color: {bg_color}; color: {text_color} !important;">{simbol}</td>'
+            html_hoq += '</tr>'
+
+        # Garis pembatas tipis antara atap atas dengan kepala tabel utama
+        html_hoq += '<tr><td colspan="{}" style="background-color:#334155; padding:2px; border:none;"></td></tr>'.format(n_side_cols + 2 + n_hows)
+
+        # -------------------------------------------------------------
+        # 2. GENERATE KEPALA TABEL BADAN UTAMA
+        # -------------------------------------------------------------
+        html_hoq += '<tr>'
+        # Header kolom Atap Samping Kiri
+        for k in range(n_side_cols):
+            html_hoq += f'<th class="side-roof-header">Korelasi L-{k+1}</th>'
+            
+        html_hoq += '<th class="hoq-th-corner">Customer Requirements (WHATs)</th>'
+        html_hoq += '<th class="hoq-importance-header">Importance</th>'
+        for col in hows_list:
+            html_hoq += f'<th class="hoq-th-hows">{col}</th>'
+        html_hoq += '</tr>'
+        
+        # -------------------------------------------------------------
+        # 3. GENERATE BADAN UTAMA + ROOF SAMPING KIRI (WHATs vs WHATs)
+        # -------------------------------------------------------------
+        for idx, row_name in enumerate(whats_list):
+            imp_val = weights[idx]
+            html_hoq += '<tr>'
+            
+            # GENERATE CELL ROOF SAMPING KIRI
+            for s_idx in range(n_side_cols):
+                target_col_idx = idx + s_idx + 1
+                if target_col_idx < n_whats:
+                    target_whats_name = whats_list[target_col_idx]
+                    val_side = st.session_state.whats_roof_matrix.at[row_name, target_whats_name]
+                    
+                    simbol_s, bg_s, text_s = "0", "#0f172a", "#475569"
+                    if "Strong Positive" in val_side: simbol_s, bg_s, text_s = "++", "#1e3a8a", "#38bdf8"
+                    elif "Positive" in val_side: simbol_s, bg_s, text_s = "+", "#14532d", "#4ade80"
+                    elif "Strong Negative" in val_side: simbol_s, bg_s, text_s = "--", "#7f1d1d", "#f87171"
+                    elif "Negative" in val_side: simbol_s, bg_s, text_s = "-", "#7c2d12", "#fb923c"
+                    
+                    html_hoq += f'<td class="side-roof-cell" style="background-color: {bg_s}; color: {text_s} !important;">{simbol_s}</td>'
+                else:
+                    html_hoq += '<td class="roof-blank"></td>'
+            
+            # Kolom Utama WHATs dan Importance
+            html_hoq += f'<td class="hoq-td-whats">{row_name}</td>'
+            html_hoq += f'<td class="hoq-importance">{int(imp_val)}</td>'
+            
+            # Kolom Spesifikasi Teknis (Badan Utama)
+            for col_name in hows_list:
+                score_val = st.session_state.rel_matrix.at[row_name, col_name]
+                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
+                simbol_hub = ""
+                
+                if score_val == 9: 
+                    simbol_hub = "◎"
+                    bg_cell = 'style="background-color: #1e3a8a; color: #38bdf8; font-size: 18px; font-weight: bold;"' 
+                elif score_val == 3: 
+                    simbol_hub = "○"
+                    bg_cell = 'style="background-color: #1e293b; color: #4ade80; font-size: 18px; font-weight: bold;"' 
+                elif score_val == 1: 
+                    simbol_hub = "△"
+                    bg_cell = 'style="background-color: #1e293b; color: #fef08a; font-size: 18px; font-weight: bold;"' 
+                
+                html_hoq += f'<td {bg_cell}>{simbol_hub}</td>'
+            html_hoq += '</tr>'
+            
+        # -------------------------------------------------------------
+        # 4. GENERATE FONDASI RUMAH HOQ (JUMLAH KIRI DISEJAJARKAN)
+        # -------------------------------------------------------------
+        # Baris Absolute Importance
+        html_hoq += '<tr class="hoq-score-row">'
+        for _ in range(n_side_cols): html_hoq += '<td class="roof-blank"></td>'
+        html_hoq += '<td style="text-align: right; color: #38bdf8;">Weighted Importance (Score)</td>'
+        html_hoq += '<td style="color: #38bdf8;">-</td>'
+        for score in abs_importance:
+            html_hoq += f'<td style="background-color: #1e293b; color: #38bdf8 !important;">{int(score)}</td>'
+        html_hoq += '</tr>'
+
+        # Baris Relative Weight (%)
+        html_hoq += '<tr class="hoq-weight-row">'
+        for _ in range(n_side_cols): html_hoq += '<td class="roof-blank"></td>'
+        html_hoq += '<td style="text-align: right; color: #2dd4bf;">Relative Importance (%)</td>'
+        html_hoq += '<td style="color: #2dd4bf;">-</td>'
+        for weight in rel_importance:
+            html_hoq += f'<td style="background-color: #1e293b; color: #2dd4bf !important;">{weight.round(1)}%</td>'
+        html_hoq += '</tr>'
+        
+        html_hoq += '</table>'
+        html_hoq += '</div>' 
+        
+        st.markdown(html_hoq, unsafe_allow_html=True)
+        
+    except Exception as e:
+        st.error(f"Gagal memuat arsitektur penuh: {e}")
