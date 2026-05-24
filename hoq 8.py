@@ -364,7 +364,7 @@ with t5:
 with t6:
     try:
         st.write("### 🏛️ Arsitektur Matriks House of Quality (HoQ) Komplit")
-        st.caption("Visualisasi profesional mengintegrasikan Atap Korelasi Segitiga Piramida, Kriteria WHATs, serta Simbol Hubungan.")
+        st.caption("Visualisasi rumah kualitas (House Of Quality mengintegrasikan Atap Korelasi Segitiga Piramida, Kriteria WHATs, serta Simbol Hubungan.")
         
         # Ambil kembali data perhitungan terkini
         valid_whats = st.session_state.df_whats[st.session_state.df_whats["Customer Requirement (WHATs)"].isin(whats_list)]
