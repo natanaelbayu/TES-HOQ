@@ -265,7 +265,7 @@ with t5:
             
         # Fondasi: Absolute Importance
         html_body += '<tr class="hoq-score-row">'
-        html_body += '<td style="text-align: right; color: #38bdf8;">Absolute Importance (Score)</td>'
+        html_body += '<td style="text-align: right; color: #38bdf8;">Weighted Importance (Score)</td>'
         html_body += '<td style="color: #38bdf8;">-</td>'
         for score in abs_importance:
             html_body += f'<td style="background-color: #1e293b; color: #38bdf8 !important;">{int(score)}</td>'
@@ -273,7 +273,7 @@ with t5:
 
         # Fondasi: Relative Weight %
         html_body += '<tr class="hoq-weight-row">'
-        html_body += '<td style="text-align: right; color: #2dd4bf;">Relative Weight (%)</td>'
+        html_body += '<td style="text-align: right; color: #2dd4bf;">Relative Importance (%)</td>'
         html_body += '<td style="color: #2dd4bf;">-</td>'
         for weight in rel_importance:
             html_body += f'<td style="background-color: #1e293b; color: #2dd4bf !important;">{weight.round(1)}%</td>'
@@ -409,7 +409,7 @@ with t6:
         # -------------------------------------------------------------
         # Baris Absolute Importance (Score)
         html_hoq += '<tr class="hoq-score-row">'
-        html_hoq += '<td style="text-align: right; color: #38bdf8;">Absolute Importance (Score)</td>'
+        html_hoq += '<td style="text-align: right; color: #38bdf8;">Weighted Importance (Score)</td>'
         html_hoq += '<td style="color: #38bdf8;">-</td>'
         for score in abs_importance:
             html_hoq += f'<td style="background-color: #1e293b; color: #38bdf8 !important;">{int(score)}</td>'
@@ -417,7 +417,7 @@ with t6:
 
         # Baris Relative Weight (%)
         html_hoq += '<tr class="hoq-weight-row">'
-        html_hoq += '<td style="text-align: right; color: #2dd4bf;">Relative Weight (%)</td>'
+        html_hoq += '<td style="text-align: right; color: #2dd4bf;">Relative Importance (%)</td>'
         html_hoq += '<td style="color: #2dd4bf;">-</td>'
         for weight in rel_importance:
             html_hoq += f'<td style="background-color: #1e293b; color: #2dd4bf !important;">{weight.round(1)}%</td>'
