@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -11,7 +10,7 @@ st.markdown("""
     .main-header { font-size: 28px; font-weight: bold; color: #38bdf8; margin-bottom: 10px; }
     .sub-header { font-size: 18px; color: #94a3b8; margin-bottom: 20px; }
     
-    /* Style Tabel Rumah HoQ untuk Tema Gelap (Dark Mode) */
+    /* Style Tabel Rumah HoQ untuk Tema Gelap (Dark Mode) Uniform */
     .hoq-table {
         border-collapse: collapse;
         margin: 20px 0;
@@ -19,49 +18,58 @@ st.markdown("""
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
-        background-color: #0f172a; /* Background dasar tabel gelap modern */
+        background-color: #0f172a; /* Background dasar tabel gelap */
     }
     .hoq-table th, .hoq-table td {
         border: 1px solid #334155;
         padding: 12px;
         text-align: center;
         font-size: 14px;
-        color: #f1f5f9; /* Teks default putih/terang */
+        color: #f1f5f9; 
     }
+    
+    /* 1. Header Kepala Tabel (Satu Warna Gelap Uniform) */
     .hoq-th-corner {
-        background-color: #1e293b;
+        background-color: #1e293b !important;
         font-weight: 600;
-        color: #94a3b8;
+        color: #f1f5f9 !important;
     }
     .hoq-th-hows {
-        background-color: #1E3A8A; /* Warna Biru #1E3A8A tetap di header */
-        color: #ffffff !important;  /* Memaksa teks tetap putih cerah */
+        background-color: #1e293b !important; 
+        color: #f1f5f9 !important;  
         font-weight: 600;
     }
+    .hoq-importance-header {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        font-weight: 600;
+    }
+    
+    /* 2. Kolom Pertama Ke Bawah (Satu Warna Gelap Seragam) */
     .hoq-td-whats {
-        background-color: #38bdf8;
+        background-color: #0f172a !important;
         text-align: left !important;
         font-weight: 600;
-        color: #1e293b;
+        color: #f1f5f9 !important;
     }
     .hoq-importance {
-        background-color: #38bdf8;
+        background-color: #1e293b !important;
         font-weight: 600;
-        color: #1e293b;
+        color: #f1f5f9 !important;
     }
+    
+    /* 3. Baris Fondasi Hasil Akhir */
     .hoq-score-row {
-        background-color: #38bdf8;
+        background-color: #1e293b;
         font-weight: bold;
-        color:  #1e293b;
         border-top: 2px solid #475569;
     }
     .hoq-weight-row {
-        background-color: #38bdf8;
+        background-color: #1e293b;
         font-weight: bold;
-        color: #1e293b;
     }
     
-    /* Memaksa isi sel default (nilai 0) berwarna latar hitam/gelap */
+    /* Memaksa isi sel default (nilai 0) berwarna latar gelap kontras */
     .hoq-table td:not([style]) {
         background-color: #0f172a !important;
         color: #64748b !important;
@@ -146,7 +154,7 @@ with t4:
     }
     st.session_state.rel_matrix = st.data_editor(st.session_state.rel_matrix, use_container_width=True, column_config=rel_column_config, key="ed_rel")
 
-# --- TAB 5: THE FINAL HOUSE (WITH FULL MUTED ROOF MATRIX) ---
+# --- TAB 5: THE FINAL HOUSE ---
 with t5:
     try:
         # Perhitungan Nilai Matematika Utama
@@ -171,36 +179,33 @@ with t5:
         st.write("### 🛖 Bagian Atap: Matriks Korelasi Antar Persyaratan Teknis")
         
         html_roof = '<table class="hoq-table">'
-        # Header Atap dengan warna #1E3A8A & teks putih
         html_roof += '<tr>'
-        html_roof += '<th class="hoq-th-corner" style="width: 30%; background-color: #f1f5f9; color: #475569;">Spesifikasi Teknis</th>'
+        html_roof += '<th class="hoq-th-corner" style="width: 30%;">Spesifikasi Teknis</th>'
         for col in hows_list:
             html_roof += f'<th class="hoq-th-hows">{col}</th>'
         html_roof += '</tr>'
         
-        # Isi Matriks Atap
         for row_name in hows_list:
             html_roof += '<tr>'
-            # Kolom pertama atap diperbaiki agar teksnya kontras dan terbaca terang
-            html_roof += f'<td class="hoq-td-whats" style="background-color: #f8fafc; color: #334155;">{row_name}</td>'
+            html_roof += f'<td class="hoq-td-whats">{row_name}</td>'
             for col_name in hows_list:
                 val = st.session_state.roof_matrix.at[row_name, col_name]
                 
                 simbol = "0"
-                bg_cell = 'style="background-color: #ffffff; color: #94a3b8;"' # Default putih jika nilai 0
+                bg_cell = 'style="background-color: #0f172a; color: #64748b;"' # Gelap jika 0
                 
                 if "Strong Positive" in val: 
                     simbol = "++"
-                    bg_cell = 'style="background-color: #e0f2fe; color: #0369a1; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #1e3a8a; color: #38bdf8; font-weight: 600;"' 
                 elif "Positive" in val: 
                     simbol = "+"
-                    bg_cell = 'style="background-color: #f0fdf4; color: #15803d; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #14532d; color: #4ade80; font-weight: 600;"' 
                 elif "Strong Negative" in val: 
                     simbol = "--"
-                    bg_cell = 'style="background-color: #fef2f2; color: #b91c1c; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #7f1d1d; color: #f87171; font-weight: 600;"' 
                 elif "Negative" in val: 
                     simbol = "-"
-                    bg_cell = 'style="background-color: #fff7ed; color: #c2410c; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #7c2d12; color: #fb923c; font-weight: 600;"' 
                 
                 html_roof += f'<td {bg_cell}>{simbol}</td>'
             html_roof += '</tr>'
@@ -215,15 +220,13 @@ with t5:
         st.write("### 🏢 Bagian Utama & Fondasi: Matriks Hubungan Terintegrasi")
         
         html_body = '<table class="hoq-table">'
-        # Header Badan dengan warna #1E3A8A & teks putih
         html_body += '<tr>'
-        html_body += '<th class="hoq-th-corner" style="width: 30%; background-color: #f1f5f9; color: #475569;">Customer Requirements (WHATs)</th>'
-        html_body += '<th class="hoq-importance" style="width: 10%;">Importance</th>'
+        html_body += '<th class="hoq-th-corner" style="width: 30%;">Customer Requirements (WHATs)</th>'
+        html_body += '<th class="hoq-importance-header" style="width: 10%;">Importance</th>'
         for col in hows_list:
             html_body += f'<th class="hoq-th-hows">{col}</th>'
         html_body += '</tr>'
         
-        # Isi Hubungan WHATs vs HOWs
         for idx, row_name in enumerate(whats_list):
             imp_val = weights[idx]
             html_body += '<tr>'
@@ -232,30 +235,29 @@ with t5:
             for col_name in hows_list:
                 score_val = st.session_state.rel_matrix.at[row_name, col_name]
                 
-                # Default putih jika nilai hubungan adalah 0
-                bg_cell = 'style="background-color: #ffffff; color: #94a3b8;"'
+                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
                 
-                if score_val == 9: bg_cell = 'style="background-color: #ffe4e6; color: #9f1239; font-weight: 600;"' 
-                elif score_val == 3: bg_cell = 'style="background-color: #ffedd5; color: #9a3412;"' 
-                elif score_val == 1: bg_cell = 'style="background-color: #fef9c3; color: #854d0e;"' 
+                if score_val == 9: bg_cell = 'style="background-color: #881337; color: #fda4af; font-weight: 600;"' 
+                elif score_val == 3: bg_cell = 'style="background-color: #7c2d12; color: #fed7aa;"' 
+                elif score_val == 1: bg_cell = 'style="background-color: #713f12; color: #fef08a;"' 
                 
                 html_body += f'<td {bg_cell}>{int(score_val)}</td>'
             html_body += '</tr>'
             
         # Fondasi: Absolute Importance
-        html_body += '<tr class="hoq-score-row" style="background-color: #f8fafc;">'
-        html_body += '<td style="text-align: right; color: #1E3A8A;">Weighted Importance (Score)</td>'
-        html_body += '<td style="color: #1E3A8A;">-</td>'
+        html_body += '<tr class="hoq-score-row">'
+        html_body += '<td style="text-align: right; color: #38bdf8;">Absolute Importance (Score)</td>'
+        html_body += '<td style="color: #38bdf8;">-</td>'
         for score in abs_importance:
-            html_body += f'<td style="color: #1E3A8A;">{int(score)}</td>'
+            html_body += f'<td style="color: #38bdf8;">{int(score)}</td>'
         html_body += '</tr>'
 
         # Fondasi: Relative Weight %
-        html_body += '<tr class="hoq-weight-row" style="background-color: #f8fafc;">'
-        html_body += '<td style="text-align: right; color: #0f766e;">Relative Importance (%)</td>'
-        html_body += '<td style="color: #0f766e;">-</td>'
+        html_body += '<tr class="hoq-weight-row">'
+        html_body += '<td style="text-align: right; color: #2dd4bf;">Relative Weight (%)</td>'
+        html_body += '<td style="color: #2dd4bf;">-</td>'
         for weight in rel_importance:
-            html_body += f'<td style="color: #0f766e;">{weight.round(1)}%</td>'
+            html_body += f'<td style="color: #2dd4bf;">{weight.round(1)}%</td>'
         html_body += '</tr>'
         html_body += '</table>'
         st.markdown(html_body, unsafe_allow_html=True)
@@ -263,15 +265,16 @@ with t5:
         st.write("---")
         
         # -------------------------------------------------------------
-        # 3. GRID GRAFIK PARETO & HIGHLIGHTS RADAR
+        # 3. GRID GRAFIK BAR (VERTIRKAL / BERDIRI) & HIGHLIGHTS
         # -------------------------------------------------------------
         col_chart, col_rank = st.columns([1.5, 1])
         
         with col_chart:
             st.write("#### 📈 Grafik Kontribusi Prioritas Teknis")
-            fig = px.bar(res_df, x="Score", y="Requirement", orientation='h', text="Weight %",
+            # Mengubah orientasi menjadi vertikal (menghapus orientation='h', tukar x dan y)
+            fig = px.bar(res_df, x="Requirement", y="Score", text="Weight %",
                          color="Score", color_continuous_scale="Blues")
-            fig.update_layout(height=350, margin=dict(t=10, b=10))
+            fig.update_layout(height=400, margin=dict(t=10, b=10))
             st.plotly_chart(fig, use_container_width=True)
             
         with col_rank:
