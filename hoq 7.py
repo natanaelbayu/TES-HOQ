@@ -244,7 +244,7 @@ with t5:
             
         # Fondasi: Absolute Importance
         html_body += '<tr class="hoq-score-row" style="background-color: #f8fafc;">'
-        html_body += '<td style="text-align: right; color: #1E3A8A;">Absolute Importance (Score)</td>'
+        html_body += '<td style="text-align: right; color: #1E3A8A;">Weighted Importance (Score)</td>'
         html_body += '<td style="color: #1E3A8A;">-</td>'
         for score in abs_importance:
             html_body += f'<td style="color: #1E3A8A;">{int(score)}</td>'
@@ -252,7 +252,7 @@ with t5:
 
         # Fondasi: Relative Weight %
         html_body += '<tr class="hoq-weight-row" style="background-color: #f8fafc;">'
-        html_body += '<td style="text-align: right; color: #0f766e;">Relative Weight (%)</td>'
+        html_body += '<td style="text-align: right; color: #0f766e;">Relative Importance (%)</td>'
         html_body += '<td style="color: #0f766e;">-</td>'
         for weight in rel_importance:
             html_body += f'<td style="color: #0f766e;">{weight.round(1)}%</td>'
