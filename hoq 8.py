@@ -7,91 +7,129 @@ st.set_page_config(page_title="Digital HoQ - UKM Tahu", layout="wide")
 
 st.markdown("""
     <style>
-    .main-header { font-size: 28px; font-weight: bold; color: #38bdf8; margin-bottom: 10px; }
-    .sub-header { font-size: 18px; color: #94a3b8; margin-bottom: 20px; }
+    /* Mengubah background aplikasi menjadi putih cerah */
+    .stApp {
+        background-color: #ffffff;
+    }
+
+    /* Judul Utama dengan warna Biru Indigo Cerah */
+    .main-header { 
+        font-size: 32px; 
+        font-weight: bold; 
+        color: #4f46e5; 
+        margin-bottom: 10px; 
+    }
     
-    /* Style Tabel Rumah HoQ untuk Tema Gelap (Dark Mode) */
+    /* Sub-judul dengan warna Abu-abu Medium */
+    .sub-header { 
+        font-size: 18px; 
+        color: #6b7280; 
+        margin-bottom: 25px; 
+    }
+    
+    /* === Style Tabel Rumah HoQ untuk Tema Terang & Full Color === */
     .hoq-table {
         border-collapse: collapse;
         margin: 20px 0;
-        font-family: sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         width: 100%;
-        border-radius: 8px;
+        border-radius: 12px;
         overflow: hidden;
-        background-color: #0f172a; /* Background dasar tabel gelap modern */
+        /* Menambahkan shadow agar tabel terlihat mengambang */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        background-color: #ffffff;
+        border: none;
     }
+    
+    /* Mengatur border dan padding dasar untuk semua sel */
     .hoq-table th, .hoq-table td {
-        border: 1px solid #334155;
-        padding: 12px;
+        border: 1px solid #e5e7eb;
+        padding: 14px;
         text-align: center;
         font-size: 14px;
-        color: #ffffff !important; /* Memaksa teks default tetap putih cerah */
+        color: #1f2937 !important; /* Warna teks default gelap agar terbaca jelas */
     }
+
+    /* === Warna Kepala Tabel (Headers) === */
+    /* Pojok kiri atas (Ungu Pastel) */
     .hoq-th-corner {
-        background-color: #1e293b !important;
-        font-weight: 600;
-        color: #ffffff !important;
+        background-color: #ede9fe !important;
+        font-weight: 700;
+        color: #4c1d95 !important;
     }
+    /* Header spesifikasi teknis / HOWs (Pink Pastel) */
     .hoq-th-hows {
-        background-color: #1e293b !important; 
-        color: #ffffff !important;  
-        font-weight: 600;
+        background-color: #fce7f3 !important; 
+        color: #9d174d !important;  
+        font-weight: 700;
     }
+    /* Header Importance (Hijau Tosca Pastel) */
     .hoq-importance-header {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        font-weight: 600;
+        background-color: #ccfbf1 !important;
+        color: #115e59 !important;
+        font-weight: 700;
     }
+
+    /* === Warna Badan Tabel (Isi Utama) === */
+    /* Kolom Kebutuhan Konsumen / WHATs (Biru Langit Pastel) */
     .hoq-td-whats {
-        background-color: #0f172a !important;
+        background-color: #e0f2fe !important;
         text-align: left !important;
         font-weight: 600;
-        color: #ffffff !important;
+        color: #075985 !important;
     }
+    /* Kolom Angka Importance (Kuning Pastel) */
     .hoq-importance {
-        background-color: #1e293b !important;
-        font-weight: 600;
-        color: #ffffff !important;
+        background-color: #fef3c7 !important;
+        font-weight: 700;
+        color: #92400e !important;
     }
+    
+    /* === Warna Bagian Dalam (Sel Korelasi yang Sebelumnya Hitam) === */
+    /* Kita beri warna Abu-abu Sangat Muda agar teks 0 terlihat bersih, tidak gelap */
+    .hoq-table td:not([class]):not([style]) {
+        background-color: #f9fafb !important;
+        color: #4b5563 !important;
+    }
+    
+    /* === Warna Fondasi Bawah (Hasil Akhir) === */
+    /* Baris Weighted Importance Score (Oranye Pastel) */
     .hoq-score-row {
-        background-color: #1e293b;
+        background-color: #ffedd5;
         font-weight: bold;
-        color: #ffffff !important;
-        border-top: 2px solid #475569;
+        color: #9a3412 !important;
+        border-top: 3px solid #fdba74;
     }
+    /* Baris Relative Importance % (Merah Pastel) */
     .hoq-weight-row {
-        background-color: #1e293b;
+        background-color: #fee2e2;
         font-weight: bold;
-        color: #ffffff !important;
+        color: #991b1b !important;
     }
     
-    /* Memaksa isi sel default (nilai 0) berwarna latar hitam/gelap */
-    .hoq-table td:not([style]) {
-        background-color: #0f172a !important;
-        color: #e2e8f0 !important;
-    }
-    
-    /* Style Khusus untuk Atap Segitiga Segitiga di Tab 6 */
+    /* === Style Khusus untuk Atap Segitiga di Tab 6 === */
     .roof-blank {
         background-color: transparent !important;
         border: none !important;
     }
     .roof-cell {
-        background-color: #1e293b;
-        border: 1px solid #475569 !important;
+        background-color: #f3f4f6; /* Abu-abu muda untuk sel atap */
+        border: 1px solid #d1d5db !important;
         font-weight: bold;
+        color: #1f2937 !important;
     }
     
-    /* Legend Info Box */
+    /* Legend Info Box dengan gradient cerah */
     .legend-box {
-        background-color: #1e293b;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid #334155;
-        margin-bottom: 15px;
+        background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     
-    /* Responsive Container untuk Full HOQ */
+    /* Responsive Container */
     .hoq-scroll-container {
         width: 100%;
         overflow-x: auto;
