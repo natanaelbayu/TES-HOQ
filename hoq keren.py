@@ -155,17 +155,14 @@ if 'df_hows' not in st.session_state:
         "Direction": ["Max", "Max", "Target", "Max"]
     })
 
-# --- TABS STRUKTUR (DENGAN PENYEMPURNAAN ANTARMUKA) ---
+# --- TABS STRUKTUR ---
 t1, t2, t3, t4, t5, t6 = st.tabs([
-    "1. Kebutuhan (WHATs)", "2. Teknis (HOWs)", "3. Korelasi Atap", "4. Matriks Hubungan", "5. 🏆 HASIL & RENCANA AKSI", "🏛️ 6. ARSITEKTUR FULL HOQ"
+    "1. WHATs", "2. HOWs", "3. Correlation", "4. Matrix", "5. 🏆 FINAL HOUSE & ACTION PLAN", "🏛️ 6. FULL HOQ ARCHITECTURE"
 ])
-
-# === LOGIKA DATA EDITOR (SAMA SEPERTI SEBELUMNYA) ===
 
 # TAB 1: Input WHATs
 with t1:
     st.subheader("Masukkan Voice of Customer (WHATs)")
-    st.caption("Isi kebutuhan pelanggan dan tingkat kepentingannya (1-5).")
     st.session_state.df_whats = st.data_editor(
         st.session_state.df_whats, 
         num_rows="dynamic", 
@@ -179,7 +176,6 @@ with t1:
 # TAB 2: Input HOWs
 with t2:
     st.subheader("Masukkan Spesifikasi Teknis (HOWs)")
-    st.caption("Tentukan arah optimalisasi spesifikasi teknis.")
     st.session_state.df_hows = st.data_editor(
         st.session_state.df_hows, 
         num_rows="dynamic", 
@@ -194,10 +190,9 @@ with t2:
 whats_list = [x for x in st.session_state.df_whats["Customer Requirement (WHATs)"].tolist() if pd.notna(x) and x != ""]
 hows_list = [x for x in st.session_state.df_hows["Technical Requirement (HOWs)"].tolist() if pd.notna(x) and x != ""]
 
-# TAB 3 (Correlation - The Roof)
+# TAB 3 (Correlation)
 with t3:
     st.subheader("Matriks Korelasi Atap (HOWs vs HOWs)")
-    st.caption("Tentukan hubungan antar spesifikasi teknis.")
     if 'roof_matrix' not in st.session_state or list(st.session_state.roof_matrix.columns) != hows_list:
         st.session_state.roof_matrix = pd.DataFrame("No Correlation (0)", index=hows_list, columns=hows_list)
     
@@ -207,11 +202,9 @@ with t3:
     }
     st.session_state.roof_matrix = st.data_editor(st.session_state.roof_matrix, use_container_width=True, column_config=roof_column_config, key="ed_roof")
 
-# TAB 4 (Relationship Matrix)
+# TAB 4 (Matrix)
 with t4:
     st.subheader("♾️ Matriks Hubungan (WHATs vs HOWs)")
-    st.info("💡 **Panduan:** Seberapa kuat pengaruh teknis (HOWs) terhadap kebutuhan konsumen (WHATs)? (9: Kuat, 3: Sedang, 1: Lemah, 0: Tidak ada)")
-    
     if 'rel_matrix' not in st.session_state or list(st.session_state.rel_matrix.columns) != hows_list or list(st.session_state.rel_matrix.index) != whats_list:
         st.session_state.rel_matrix = pd.DataFrame(0, index=whats_list, columns=hows_list)
     
@@ -222,10 +215,10 @@ with t4:
     st.session_state.rel_matrix = st.data_editor(st.session_state.rel_matrix, use_container_width=True, column_config=rel_column_config, key="ed_rel")
 
 
-# --- TAB 5: HASIL & RENCANA AKSI (DENGAN TAMPILAN FRESH) ---
+# --- TAB 5: FINAL HOUSE & ACTION PLAN (PERBAIKAN GRAFIK HILANG) ---
 with t5:
     try:
-        # Perhitungan Nilai Matematika (Logika Sama)
+        # Perhitungan Nilai Matematika
         valid_whats = st.session_state.df_whats[st.session_state.df_whats["Customer Requirement (WHATs)"].isin(whats_list)]
         weights = valid_whats["Importance (1-5)"].values.astype(float)
         matrix_values = st.session_state.rel_matrix.loc[whats_list, hows_list].values.astype(float)
@@ -234,138 +227,95 @@ with t5:
         total = abs_importance.sum()
         rel_importance = (abs_importance / total * 100) if total > 0 else abs_importance * 0
 
-        # DataFrame Hasil
+        # Buat DataFrame Hasil Akhir
         res_df = pd.DataFrame({
             "Requirement": hows_list,
             "Score": abs_importance,
             "Weight %": rel_importance.round(1)
         }).sort_values(by="Score", ascending=False)
 
-        # Interpretasi Strategis (Tampilan Sukses/Peringatan Terang)
-        st.write("### 💡 Kesimpulan Strategis")
+        st.markdown('### 💡 Kesimpulan Strategis & Arah Pengembangan')
         
+        # Penanganan jika data masih serba nol (agar teks persentase dinamis)
         top_priority = res_df.iloc[0]
-        st.success(f"✍️ **Fokus Utama:** Prioritaskan optimalisasi penuh pada **{top_priority['Requirement']}** karena memberikan kontribusi terbesar ({top_priority['Weight %']}%) terhadap kepuasan pelanggan.")
+        display_weight = f"{top_priority['Weight %']}%" if total > 0 else "0.0%"
+
+        # Membuat container atas (Rekomendasi Utama & Urutan Urgensi)
+        col_rec, col_urg = st.columns([1.2, 1])
         
+        with col_rec:
+            st.success(f"✍️ **Rekomendasi Utama Untuk Bisnis Anda:**\n\nUntuk memaksimalkan kepuasan pelanggan tanpa membuang-buang anggaran, fokuskan seluruh biaya dan resource teknis tim Anda saat ini pada pengembangan: **{top_priority['Requirement']}**.\n\nSpesifikasi ini memegang kontribusi terbesar, yaitu sebesar **{display_weight}** dari total seluruh ekspektasi pelanggan yang Anda masukkan.")
+        
+        with col_urg:
+            st.warning("⚠️ **Urutan Urgensi Rencana Aksi (Action Plan):**")
+            for idx, row in enumerate(res_df.itertuples()):
+                label = "Prioritas Utama (Segera Eksekusi)" if idx == 0 else "Prioritas Sekunder (Pantau Berkala)" if idx == 1 else "Prioritas Tersier (Pertahankan)" if idx == 2 else "Pendukung"
+                st.markdown(f"{idx+1}. **{label}**: Optimalisasi/jaga parameter pada `{row.Requirement}`.")
+
+        with st.expander("🔍 Bagaimana sistem menentukan arah rekomendasi ini?"):
+            st.write("Sistem mendeteksi tingkat kepentingan pelanggan (Importance Score) lalu mengalikannya dengan bobot matriks hubungan (9/3/1/0) pada masing-masing spesifikasi teknis untuk mendapatkan nilai prioritas kumulatif.")
+
+        st.write("---")
+
+        # --------------------------------------------------------------------------------------
+        # REVISI STRUKTUR: Meletakkan Cetak Grafik & Urutan Medali tepat di bawahnya secara absolut
+        # --------------------------------------------------------------------------------------
+        col_chart, col_rank = st.columns([1.4, 1])
+        with col_chart:
+            st.write("#### 📈 Grafik Prioritas Spesifikasi Teknis")
+            # Skala warna cerah Viridis
+            fig = px.bar(res_df, x="Requirement", y="Weight %", text="Weight %",
+                         color="Score", color_continuous_scale="Viridis", labels={'Weight %':'Kontribusi (%)'})
+            fig.update_layout(height=380, margin=dict(t=20, b=10), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+            fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+            st.plotly_chart(fig, use_container_width=True)
+            
+        with col_rank:
+            st.write("#### 🏆 Urutan Rencana Aksi (Medal Berwarna)")
+            for i, row in enumerate(res_df.itertuples()):
+                medal = "🥇 PRIORITAS UTAMA" if i == 0 else "🥈 KEDUA" if i == 1 else "🥉 KETIGA" if i == 2 else "🔹 PENDUKUNG"
+                st.info(f"**{medal}**\n\n**{row.Requirement}** — Skor: *{int(row.Score)}* ({row._3}%)")
+
         st.write("---")
 
         # -------------------------------------------------------------
-        # 1. VISUALISASI MATRIKS ATAP (TAMPILAN COLORFUL)
+        # VENDOR MATRIKS DI BAGIAN BAWAH TAB 5 (TETAP ADA & COLORFUL)
         # -------------------------------------------------------------
-        st.write("### 🛖 Bagian Atap: Matriks Korelasi Teknis")
-        
-        html_roof = '<table class="hoq-table">'
-        html_roof += '<tr>'
-        html_roof += '<th class="hoq-th-corner" style="width: 30%;">Spesifikasi Teknis</th>'
-        for col in hows_list:
-            html_roof += f'<th class="hoq-th-hows">{col}</th>'
-        html_roof += '</tr>'
-        
-        for row_name in hows_list:
-            html_roof += '<tr>'
-            html_roof += f'<td class="hoq-td-whats">{row_name}</td>'
-            for col_name in hows_list:
-                val = st.session_state.roof_matrix.at[row_name, col_name]
-                
-                simbol = "0"
-                # Warna sel default cerah
-                bg_cell = 'style="background-color: #f9fafb; color: #6b7280;"'
-                
-                # Warna simbol cerah (bukan gelap)
-                if "Strong Positive" in val: simbol, bg_cell = "++", 'style="background-color: #dbeafe; color: #1e40af; font-weight: bold;"' # Biru cerah
-                elif "Positive" in val: simbol, bg_cell = "+", 'style="background-color: #d1fae5; color: #065f46; font-weight: bold;"' # Hijau cerah
-                elif "Strong Negative" in val: simbol, bg_cell = "--", 'style="background-color: #fee2e2; color: #991b1b; font-weight: bold;"' # Merah cerah
-                elif "Negative" in val: simbol, bg_cell = "-", 'style="background-color: #ffedd5; color: #9a3412; font-weight: bold;"' # Oranye cerah
-                
-                html_roof += f'<td {bg_cell}>{simbol}</td>'
-            html_roof += '</tr>'
-        html_roof += '</table>'
-        st.markdown(html_roof, unsafe_allow_html=True)
-
-        st.write("")
-
-        # -------------------------------------------------------------
-        # 2. VISUALISASI MATRIKS UTAMA & FONDASI (TAMPILAN COLORFUL)
-        # -------------------------------------------------------------
-        st.write("### 🏢 Bagian Utama & Fondasi: Matriks Hubungan")
-        
+        st.write("### 🏢 Bagian Utama & Fondasi: Matriks Hubungan Terintegrasi")
         html_body = '<table class="hoq-table">'
-        html_body += '<tr>'
-        html_body += '<th class="hoq-th-corner" style="width: 30%;">Kebutuhan Konsumen (WHATs)</th>'
-        html_body += '<th class="hoq-importance-header" style="width: 10%;">Importance</th>'
+        html_body += '<tr><th class="hoq-th-corner" style="width: 30%;">Customer Requirements (WHATs)</th><th class="hoq-importance-header" style="width: 10%;">Importance</th>'
         for col in hows_list:
             html_body += f'<th class="hoq-th-hows">{col}</th>'
         html_body += '</tr>'
         
         for idx, row_name in enumerate(whats_list):
             imp_val = weights[idx]
-            html_body += '<tr>'
-            html_body += f'<td class="hoq-td-whats">{row_name}</td>'
-            html_body += f'<td class="hoq-importance">{int(imp_val)}</td>'
+            html_body += f'<tr><td class="hoq-td-whats">{row_name}</td><td class="hoq-importance">{int(imp_val)}</td>'
             for col_name in hows_list:
                 score_val = st.session_state.rel_matrix.at[row_name, col_name]
-                
-                # Warna sel bagian dalam cerah (f9fafb)
                 bg_cell = 'style="background-color: #f9fafb; color: #6b7280;"'
-                
-                # Warna skor kuat pastel cerah (bukan gelap)
-                if score_val == 9: bg_cell = 'style="background-color: #fce7f3; color: #9d174d; font-weight: bold; font-size: 16px;"' # Pink Kuat
-                elif score_val == 3: bg_cell = 'style="background-color: #ffedd5; color: #9a3412; font-weight: bold;"' # Oranye
-                elif score_val == 1: bg_cell = 'style="background-color: #ede9fe; color: #4c1d95; font-weight: bold;"' # Ungu
-                
+                if score_val == 9: bg_cell = 'style="background-color: #fce7f3; color: #9d174d; font-weight: bold; font-size: 16px;"'
+                elif score_val == 3: bg_cell = 'style="background-color: #ffedd5; color: #9a3412; font-weight: bold;"'
+                elif score_val == 1: bg_cell = 'style="background-color: #ede9fe; color: #4c1d95; font-weight: bold;"'
                 html_body += f'<td {bg_cell}>{int(score_val)}</td>'
             html_body += '</tr>'
             
-        # Fondasi cerah
-        html_body += '<tr class="hoq-score-row">'
-        html_body += '<td style="text-align: right;">Weighted Importance Score</td>'
-        html_body += '<td>-</td>'
-        for score in abs_importance:
-            html_body += f'<td>{int(score)}</td>'
-        html_body += '</tr>'
-
-        html_body += '<tr class="hoq-weight-row">'
-        html_body += '<td style="text-align: right;">Relative Importance (%)</td>'
-        html_body += '<td>-</td>'
-        for weight in rel_importance:
-            html_body += f'<td>{weight.round(1)}%</td>'
-        html_body += '</tr>'
-        html_body += '</table>'
+        html_body += f'<tr class="hoq-score-row"><td style="text-align: right;">Weighted Importance (Score)</td><td>-</td>'
+        for score in abs_importance: html_body += f'<td>{int(score)}</td>'
+        html_body += '</tr><tr class="hoq-weight-row"><td style="text-align: right;">Relative Importance (%)</td><td>-</td>'
+        for weight in rel_importance: html_body += f'<td>{weight.round(1)}%</td>'
+        html_body += '</tr></table>'
         st.markdown(html_body, unsafe_allow_html=True)
-        
-        st.write("---")
-        
-        # -------------------------------------------------------------
-        # 3. GRAFIK & MEDALI (TAMPILAN COLORFUL)
-        # -------------------------------------------------------------
-        col_chart, col_rank = st.columns([1.5, 1])
-        with col_chart:
-            st.write("#### 📈 Grafik Prioritas Spesifikasi Teknis")
-            # Menggunakan skala warna cerah "Viridis"
-            fig = px.bar(res_df, x="Requirement", y="Weight %", text="Weight %",
-                         color="Score", color_continuous_scale="Viridis", labels={'Weight %':'Kontribusi (%)'})
-            fig.update_layout(height=400, margin=dict(t=10, b=10), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-            fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-            st.plotly_chart(fig, use_container_width=True)
-            
-        with col_rank:
-            st.write("#### 🏆 Urutan Rencana Aksi")
-            for i, row in enumerate(res_df.itertuples()):
-                medal = "🥇 PRIORITAS UTAMA" if i == 0 else "🥈 KEDUA" if i == 1 else "🥉 KETIGA" if i == 2 else "🔹 PENDUKUNG"
-                # Menggunakan st.info agar background medali cerah
-                st.info(f"**{medal}**\n\n**{row.Requirement}** — Skor: *{int(row.Score)}* ({row._3}%)")
 
     except Exception as e:
-        st.error("Lengkapi data di tab 1-4 terlebih dahulu untuk melihat hasil.")
+        st.error("Pastikan Anda mengisi data secukupnya pada Tab 1 sampai Tab 4.")
 
 
-# --- 🏛️ TAB 6: ARSITEKTUR FULL HOQ (TEMPELAN COLORFUL & FRESH) ---
+# --- 🏛️ TAB 6: ARSITEKTUR FULL HOQ ---
 with t6:
     try:
         st.write("### 🏛️ Visualisasi Arsitektur House of Quality (HoQ) Komplit")
-        st.caption("Rumah Kualitas utuh menggabungkan Atap Korelasi, Matriks Hubungan (WHATs vs HOWs), dan Hasil Fondasi.")
         
-        # Perhitungan ulang (Lama)
         valid_whats = st.session_state.df_whats[st.session_state.df_whats["Customer Requirement (WHATs)"].isin(whats_list)]
         weights = valid_whats["Importance (1-5)"].values.astype(float)
         matrix_values = st.session_state.rel_matrix.loc[whats_list, hows_list].values.astype(float)
@@ -374,7 +324,6 @@ with t6:
         rel_importance = (abs_importance / total * 100) if total > 0 else abs_importance * 0
         n_hows = len(hows_list)
         
-        # Legend cerah
         st.markdown("""
         <div class="legend-box">
             <strong>ℹ️ Keterangan Simbol Matriks Hubungan:</strong><br>
@@ -385,19 +334,10 @@ with t6:
         </div>
         """, unsafe_allow_html=True)
         
-        html_hoq = '<div class="hoq-scroll-container">'
-        # width:auto agar tabel tidak melar ke samping
-        html_hoq += '<table class="hoq-table" style="width:auto; margin:auto; border: none; box-shadow: none;">'
+        html_hoq = '<div class="hoq-scroll-container"><table class="hoq-table" style="width:auto; margin:auto; border: none; box-shadow: none;">'
         
-        # -------------------------------------------------------------
-        # 1. GENERATE ATAP SEGITIGA (Full Color)
-        # -------------------------------------------------------------
         for i in range(n_hows - 1):
-            html_hoq += '<tr>'
-            # Space kosong kiri cerah
-            html_hoq += '<td class="roof-blank" style="width:250px; background-color: #ffffff;"></td>'
-            html_hoq += '<td class="roof-blank" style="width:80px; background-color: #ffffff;"></td>'
-            
+            html_hoq += '<tr><td class="roof-blank" style="width:250px; background-color: #ffffff;"></td><td class="roof-blank" style="width:80px; background-color: #ffffff;"></td>'
             for j in range(n_hows):
                 if j < (n_hows - 1 - i):
                     html_hoq += '<td class="roof-blank" style="background-color: #ffffff;"></td>'
@@ -405,84 +345,47 @@ with t6:
                     row_target = hows_list[j]
                     col_target = hows_list[n_hows - 1 - i]
                     val = st.session_state.roof_matrix.at[row_target, col_target]
-                    
-                    simbol = ""
-                    # Sel atap cerah (f3f4f6)
-                    bg_color, text_color = "#f3f4f6", "#6b7280"
-                    
-                    # Warna simbol cerah pastel
+                    simbol, bg_color, text_color = "", "#f3f4f6", "#6b7280"
                     if "Strong Positive" in val: simbol, bg_color, text_color = "++", "#dbeafe", "#1e40af"
                     elif "Positive" in val: simbol, bg_color, text_color = "+", "#d1fae5", "#065f46"
                     elif "Strong Negative" in val: simbol, bg_color, text_color = "--", "#fee2e2", "#991b1b"
                     elif "Negative" in val: simbol, bg_color, text_color = "-", "#ffedd5", "#9a3412"
                     elif "No Correlation" in val: simbol = "0"
-                    
                     html_hoq += f'<td class="roof-cell" style="background-color: {bg_color}; color: {text_color} !important;">{simbol}</td>'
             html_hoq += '</tr>'
 
-        # Garis pembatas cerah
         html_hoq += '<tr><td colspan="{}" style="background-color:#fdba74; padding:2px; border:none;"></td></tr>'.format(n_hows + 2)
 
-        # -------------------------------------------------------------
-        # 2. GENERATE KEPALA TABEL BADAN UTAMA (Full Color)
-        # -------------------------------------------------------------
-        html_hoq += '<tr>'
-        html_hoq += '<th class="hoq-th-corner">Kebutuhan Konsumen (WHATs)</th>'
-        html_hoq += '<th class="hoq-importance-header">Importance</th>'
-        for col in hows_list:
-            html_hoq += f'<th class="hoq-th-hows">{col}</th>'
+        html_hoq += '<tr><th class="hoq-th-corner">Kebutuhan Konsumen (WHATs)</th><th class="hoq-importance-header">Importance</th>'
+        for col in hows_list: html_hoq += f'<th class="hoq-th-hows">{col}</th>'
         html_hoq += '</tr>'
         
-        # -------------------------------------------------------------
-        # 3. GENERATE BADAN MATRIKS UTAMA (MENGGUNAKAN SIMBOL ◎, ○, △ COLORFUL)
-        # -------------------------------------------------------------
         for idx, row_name in enumerate(whats_list):
             imp_val = weights[idx]
-            html_hoq += '<tr>'
-            html_hoq += f'<td class="hoq-td-whats">{row_name}</td>'
-            html_hoq += f'<td class="hoq-importance">{int(imp_val)}</td>'
+            html_hoq += f'<tr><td class="hoq-td-whats">{row_name}</td><td class="hoq-importance">{int(imp_val)}</td>'
             for col_name in hows_list:
                 score_val = st.session_state.rel_matrix.at[row_name, col_name]
-                
-                # Warna sel bagian dalam cerah (f9fafb)
                 bg_cell = 'style="background-color: #f9fafb; color: #6b7280;"'
                 simbol_hub = ""
-                
-                # Warna simbol kuat cerah pastel
                 if score_val == 9: 
                     simbol_hub = "◎"
-                    bg_cell = 'style="background-color: #fce7f3; color: #9d174d; font-size: 20px; font-weight: bold;"' # Pink Kuat
+                    bg_cell = 'style="background-color: #fce7f3; color: #9d174d; font-size: 20px; font-weight: bold;"'
                 elif score_val == 3: 
                     simbol_hub = "○"
-                    bg_cell = 'style="background-color: #ffedd5; color: #9a3412; font-size: 18px; font-weight: bold;"' # Oranye
+                    bg_cell = 'style="background-color: #ffedd5; color: #9a3412; font-size: 18px; font-weight: bold;"'
                 elif score_val == 1: 
                     simbol_hub = "△"
-                    bg_cell = 'style="background-color: #ede9fe; color: #4c1d95; font-size: 18px; font-weight: bold;"' # Ungu
-                
+                    bg_cell = 'style="background-color: #ede9fe; color: #4c1d95; font-size: 18px; font-weight: bold;"'
                 html_hoq += f'<td {bg_cell}>{simbol_hub}</td>'
             html_hoq += '</tr>'
             
-        # -------------------------------------------------------------
-        # 4. GENERATE FONDASI RUMAH HOQ (Full Color)
-        # -------------------------------------------------------------
-        html_hoq += '<tr class="hoq-score-row" style="box-shadow: none;">'
-        html_hoq += '<td style="text-align: right;">Weighted Importance Score</td>'
-        html_hoq += '<td>-</td>'
-        for score in abs_importance:
-            html_hoq += f'<td>{int(score)}</td>'
-        html_hoq += '</tr>'
-
-        html_hoq += '<tr class="hoq-weight-row" style="box-shadow: none;">'
-        html_hoq += '<td style="text-align: right;">Relative Importance (%)</td>'
-        html_hoq += '<td>-</td>'
-        for weight in rel_importance:
-            html_hoq += f'<td>{weight.round(1)}%</td>'
-        html_hoq += '</tr>'
-        
-        html_hoq += '</table>'
-        html_hoq += '</div>'
+        html_hoq += '<tr class="hoq-score-row" style="box-shadow: none;"><td style="text-align: right;">Weighted Importance Score</td><td>-</td>'
+        for score in abs_importance: html_hoq += f'<td>{int(score)}</td>'
+        html_hoq += '</tr><tr class="hoq-weight-row" style="box-shadow: none;"><td style="text-align: right;">Relative Importance (%)</td><td>-</td>'
+        for weight in rel_importance: html_hoq += f'<td>{weight.round(1)}%</td>'
+        html_hoq += '</tr></table></div>'
         
         st.markdown(html_hoq, unsafe_allow_html=True)
         
     except Exception as e:
-        st.error("Lengkapi data di tab 1-4 untuk melihat Arsitektur Full HOQ.")
+        st.error("Lengkapi data terlebih dahulu untuk memuat arsitektur.")
