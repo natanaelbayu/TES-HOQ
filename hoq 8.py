@@ -95,14 +95,14 @@ st.markdown("""
     /* === Warna Fondasi Bawah (Hasil Akhir) === */
     /* Baris Weighted Importance Score (Oranye Pastel) */
     .hoq-score-row {
-        background-color: #ffedd5;
+        background-color: #ffedd5 !important;
         font-weight: bold;
         color: #9a3412 !important;
         border-top: 3px solid #fdba74;
     }
     /* Baris Relative Importance % (Merah Pastel) */
     .hoq-weight-row {
-        background-color: #fee2e2;
+        background-color: #fee2e2 !important;
         font-weight: bold;
         color: #991b1b !important;
     }
@@ -204,11 +204,10 @@ with t3:
     }
     st.session_state.roof_matrix = st.data_editor(st.session_state.roof_matrix, use_container_width=True, column_config=roof_column_config, key="ed_roof")
 
-# TAB 4 (Relationship Matrix - DIBUAT USER-FRIENDLY)
+# TAB 4 (Relationship Matrix)
 with t4:
     st.subheader("♾️ Hubungan Kebutuhan Konsumen vs Spesifikasi Teknis")
     
-    # Penjelasan interaktif agar orang awam tidak bingung dengan angka matriks QFD standar
     st.info("""
     💡 **Panduan :**
     Pikirkan seberapa besar pengaruh **'Spesifikasi Teknis'** dalam memenuhi **'Kebutuhan Konsumen'** Anda:
@@ -228,7 +227,7 @@ with t4:
     st.session_state.rel_matrix = st.data_editor(st.session_state.rel_matrix, use_container_width=True, column_config=rel_column_config, key="ed_rel")
 
 
-# --- TAB 5: THE FINAL HOUSE & ACTION PLAN (DENGAN INTELLIGENT INSIGHTS) ---
+# --- TAB 5: THE FINAL HOUSE & ACTION PLAN ---
 with t5:
     try:
         # Perhitungan Nilai Matematika Utama
@@ -247,9 +246,6 @@ with t5:
             "Weight %": rel_importance.round(1)
         }).sort_values(by="Score", ascending=False)
 
-        # -------------------------------------------------------------
-        # INTERPRETASI STRATEGIS & OTOMATIS UNTUK ORANG AWAM (FITUR UTAMA BARU)
-        # -------------------------------------------------------------
         st.write("### 💡 Kesimpulan Strategis & Arah Pengembangan")
         
         # Ekstrak 3 prioritas teratas berdasarkan perhitungan HOQ
@@ -276,7 +272,6 @@ with t5:
             if len(priority_names) > 2:
                 st.write(f"3. **Prioritas Tersier (Pertahankan):** Lakukan pengawasan standarisasi pada `{priority_names[2]}`.")
 
-        # Penjelasan sederhana bagi pelaku usaha non-teknis
         with st.expander("🔍 Bagaimana sistem menentukan arah rekomendasi ini?"):
             st.write("""
             Sistem mengalikan bobot tingkat kepentingan yang diinginkan konsumen dengan nilai efektivitas spesifikasi produksi yang Anda rancang. 
@@ -287,7 +282,7 @@ with t5:
         st.write("---")
 
         # -------------------------------------------------------------
-        # 1. VISUALISASI MATRIKS ATAP (HOWs vs HOWs) - VERSI LAMA
+        # 1. VISUALISASI MATRIKS ATAP (HOWs vs HOWs) - VERSI CERAH
         # -------------------------------------------------------------
         st.write("### 🛖 Bagian Atap: Matriks Korelasi Antar Persyaratan Teknis")
         
@@ -305,20 +300,20 @@ with t5:
                 val = st.session_state.roof_matrix.at[row_name, col_name]
                 
                 simbol = "0"
-                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
+                bg_cell = 'style="background-color: #f9fafb; color: #9ca3af;"' # Default cerah netral jika 0
                 
                 if "Strong Positive" in val: 
                     simbol = "++"
-                    bg_cell = 'style="background-color: #1e3a8a; color: #ffffff; font-weight: 600;"' 
-                if "Positive" in val: 
+                    bg_cell = 'style="background-color: #dbeafe; color: #1e40af; font-weight: 600;"' 
+                elif "Positive" in val: 
                     simbol = "+"
-                    bg_cell = 'style="background-color: #14532d; color: #ffffff; font-weight: 600;"' 
-                if "Strong Negative" in val: 
+                    bg_cell = 'style="background-color: #dcfce7; color: #166534; font-weight: 600;"' 
+                elif "Strong Negative" in val: 
                     simbol = "--"
-                    bg_cell = 'style="background-color: #7f1d1d; color: #ffffff; font-weight: 600;"' 
-                if "Negative" in val: 
+                    bg_cell = 'style="background-color: #fee2e2; color: #991b1b; font-weight: 600;"' 
+                elif "Negative" in val: 
                     simbol = "-"
-                    bg_cell = 'style="background-color: #7c2d12; color: #ffffff; font-weight: 600;"' 
+                    bg_cell = 'style="background-color: #ffedd5; color: #9a3412; font-weight: 600;"' 
                 
                 html_roof += f'<td {bg_cell}>{simbol}</td>'
             html_roof += '</tr>'
@@ -328,7 +323,7 @@ with t5:
         st.write("")
 
         # -------------------------------------------------------------
-        # 2. VISUALISASI BADAN & FONDASI RUMAH HOQ - VERSI LAMA (ANGKA)
+        # 2. VISUALISASI BADAN & FONDASI RUMAH HOQ - VERSI CERAH
         # -------------------------------------------------------------
         st.write("### 🏢 Bagian Utama & Fondasi: Matriks Hubungan Terintegrasi")
         
@@ -348,38 +343,39 @@ with t5:
             for col_name in hows_list:
                 score_val = st.session_state.rel_matrix.at[row_name, col_name]
                 
-                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
+                bg_cell = 'style="background-color: #f9fafb; color: #9ca3af;"' # Default cerah jika 0
                 
-                if score_val == 9: bg_cell = 'style="background-color: #881337; color: #ffffff; font-weight: 600;"' 
-                elif score_val == 3: bg_cell = 'style="background-color: #7c2d12; color: #ffffff; font-weight: 600;"' 
-                elif score_val == 1: bg_cell = 'style="background-color: #713f12; color: #ffffff; font-weight: 600;"' 
+                if score_val == 9: 
+                    bg_cell = 'style="background-color: #ffe4e6; color: #9f1239; font-weight: 600;"' 
+                elif score_val == 3: 
+                    bg_cell = 'style="background-color: #ffedd5; color: #9a3412; font-weight: 600;"' 
+                elif score_val == 1: 
+                    bg_cell = 'style="background-color: #fef9c3; color: #854d0e; font-weight: 600;"' 
                 
                 html_body += f'<td {bg_cell}>{int(score_val)}</td>'
             html_body += '</tr>'
             
         # Fondasi: Absolute Importance
         html_body += '<tr class="hoq-score-row">'
-        html_body += '<td style="text-align: right; color: #38bdf8;">Weighted Importance (Score)</td>'
-        html_body += '<td style="color: #38bdf8;">-</td>'
+        html_body += '<td style="text-align: right; font-weight: bold;">Weighted Importance (Score)</td>'
+        html_body += '<td>-</td>'
         for score in abs_importance:
-            html_body += f'<td style="background-color: #1e293b; color: #38bdf8 !important;">{int(score)}</td>'
+            html_body += f'<td style="font-weight: 700;">{int(score)}</td>'
         html_body += '</tr>'
 
         # Fondasi: Relative Weight %
         html_body += '<tr class="hoq-weight-row">'
-        html_body += '<td style="text-align: right; color: #2dd4bf;">Relative Importance (%)</td>'
-        html_body += '<td style="color: #2dd4bf;">-</td>'
+        html_body += '<td style="text-align: right; font-weight: bold;">Relative Importance (%)</td>'
+        html_body += '<td>-</td>'
         for weight in rel_importance:
-            html_body += f'<td style="background-color: #1e293b; color: #2dd4bf !important;">{weight.round(1)}%</td>'
+            html_body += f'<td style="font-weight: 700;">{weight.round(1)}%</td>'
         html_body += '</tr>'
         html_body += '</table>'
         st.markdown(html_body, unsafe_allow_html=True)
         
         st.write("---")
         
-        # -------------------------------------------------------------
         # 3. GRID GRAFIK BAR (VERTIKAL) & BADGE STRATEGIS
-        # -------------------------------------------------------------
         col_chart, col_rank = st.columns([1.5, 1])
         with col_chart:
             st.write("#### 📈 Grafik Kontribusi Prioritas Teknis")
@@ -398,13 +394,12 @@ with t5:
         st.error("Silakan lengkapi atau periksa kembali seluruh inputan di tab sebelumnya!")
 
 
-# --- 🏛️ TAB 6: FULL HOQ ARCHITECTURE (DENGAN PROTEKSI RESPONSIVE LAYOUT) ---
+# --- 🏛️ TAB 6: FULL HOQ ARCHITECTURE ---
 with t6:
     try:
         st.write("### 🏛️ Arsitektur Matriks House of Quality (HoQ) Komplit")
         st.caption("Visualisasi rumah kualitas (House Of Quality) mengintegrasikan Atap Korelasi Segitiga Piramida, Kriteria WHATs, serta Simbol Hubungan.")
         
-        # Ambil kembali data perhitungan terkini
         valid_whats = st.session_state.df_whats[st.session_state.df_whats["Customer Requirement (WHATs)"].isin(whats_list)]
         weights = valid_whats["Importance (1-5)"].values.astype(float)
         matrix_values = st.session_state.rel_matrix.loc[whats_list, hows_list].values.astype(float)
@@ -419,28 +414,25 @@ with t6:
         st.markdown("""
         <div class="legend-box">
             <strong>ℹ️ Keterangan Simbol Hubungan Matriks (Badan Utama):</strong><br>
-            <span style="color: #38bdf8;"><strong>◎</strong> Kontribusi Kuat (Skor 9)</span> &nbsp;|&nbsp; 
-            <span style="color: #4ade80;"><strong>○</strong> Kontribusi Sedang (Skor 3)</span> &nbsp;|&nbsp; 
-            <span style="color: #fef08a;"><strong>△</strong> Kontribusi Lemah (Skor 1)</span> &nbsp;|&nbsp; 
-            <span style="color: #64748b;">Tanpa Simbol = Tidak Berhubungan (Skor 0)</span>
+            <span style="color: #1e40af;"><strong>◎</strong> Kontribusi Kuat (Skor 9)</span> &nbsp;|&nbsp; 
+            <span style="color: #166534;"><strong>○</strong> Kontribusi Sedang (Skor 3)</span> &nbsp;|&nbsp; 
+            <span style="color: #854d0e;"><strong>△</strong> Kontribusi Lemah (Skor 1)</span> &nbsp;|&nbsp; 
+            <span style="color: #9ca3af;">Tanpa Simbol = Tidak Berhubungan (Skor 0)</span>
         </div>
         """, unsafe_allow_html=True)
         
-        # MEMBUNGKUS STRUKTUR HTML AGAR TIDAK MERUSAK LAYOUT PADA LAYAR KECIL/LAPTOP
         html_hoq = '<div class="hoq-scroll-container">'
         html_hoq += '<table class="hoq-table" style="width:auto; margin:auto;">'
         
         # -------------------------------------------------------------
-        # 1. GENERATE ATAP SEGITIGA (Roof Matrix Upper Triangle)
+        # 1. GENERATE ATAP SEGITIGA (Roof Matrix Upper Triangle) - CERAH
         # -------------------------------------------------------------
         for i in range(n_hows - 1):
             html_hoq += '<tr>'
-            # Membuat space kosong transparan di kiri (sejajar kolom WHATs dan Importance)
             html_hoq += '<td class="roof-blank" style="width:250px;"></td>'
             html_hoq += '<td class="roof-blank" style="width:80px;"></td>'
             
             for j in range(n_hows):
-                # Membentuk diagonal segitiga atas berundak ke kanan
                 if j < (n_hows - 1 - i):
                     html_hoq += '<td class="roof-blank"></td>'
                 else:
@@ -449,20 +441,20 @@ with t6:
                     val = st.session_state.roof_matrix.at[row_target, col_target]
                     
                     simbol = ""
-                    bg_color = "#1e293b"
-                    text_color = "#64748b"
+                    bg_color = "#f9fafb"
+                    text_color = "#9ca3af"
                     
-                    if "Strong Positive" in val: simbol, bg_color, text_color = "++", "#1e3a8a", "#38bdf8"
-                    elif "Positive" in val: simbol, bg_color, text_color = "+", "#14532d", "#4ade80"
-                    elif "Strong Negative" in val: simbol, bg_color, text_color = "--", "#7f1d1d", "#f87171"
-                    elif "Negative" in val: simbol, bg_color, text_color = "-", "#7c2d12", "#fb923c"
-                    elif "No Correlation" in val: simbol, bg_color, text_color = "0", "#0f172a", "#475569"
+                    if "Strong Positive" in val: simbol, bg_color, text_color = "++", "#dbeafe", "#1e40af"
+                    elif "Positive" in val: simbol, bg_color, text_color = "+", "#dcfce7", "#166534"
+                    elif "Strong Negative" in val: simbol, bg_color, text_color = "--", "#fee2e2", "#991b1b"
+                    elif "Negative" in val: simbol, bg_color, text_color = "-", "#ffedd5", "#9a3412"
+                    elif "No Correlation" in val: simbol, bg_color, text_color = "0", "#f3f4f6", "#6b7280"
                     
                     html_hoq += f'<td class="roof-cell" style="background-color: {bg_color}; color: {text_color} !important;">{simbol}</td>'
             html_hoq += '</tr>'
 
         # Garis pembatas tipis antara atap segitiga dengan kepala tabel utama
-        html_hoq += '<tr><td colspan="{}" style="background-color:#334155; padding:2px; border:none;"></td></tr>'.format(n_hows + 2)
+        html_hoq += '<tr><td colspan="{}" style="background-color:#e5e7eb; padding:2px; border:none;"></td></tr>'.format(n_hows + 2)
 
         # -------------------------------------------------------------
         # 2. GENERATE KEPALA TABEL BADAN UTAMA
@@ -475,7 +467,7 @@ with t6:
         html_hoq += '</tr>'
         
         # -------------------------------------------------------------
-        # 3. GENERATE BADAN MATRIKS UTAMA (MENGGUNAKAN SIMBOL ◎, ○, △)
+        # 3. GENERATE BADAN MATRIKS UTAMA (SIMBOL CERAH)
         # -------------------------------------------------------------
         for idx, row_name in enumerate(whats_list):
             imp_val = weights[idx]
@@ -485,45 +477,44 @@ with t6:
             for col_name in hows_list:
                 score_val = st.session_state.rel_matrix.at[row_name, col_name]
                 
-                bg_cell = 'style="background-color: #0f172a; color: #64748b;"'
+                bg_cell = 'style="background-color: #f9fafb; color: #9ca3af;"'
                 simbol_hub = ""
                 
                 if score_val == 9: 
                     simbol_hub = "◎"
-                    bg_cell = 'style="background-color: #1e3a8a; color: #38bdf8; font-size: 18px; font-weight: bold;"' 
+                    bg_cell = 'style="background-color: #ffe4e6; color: #9f1239; font-size: 18px; font-weight: bold;"' 
                 elif score_val == 3: 
                     simbol_hub = "○"
-                    bg_cell = 'style="background-color: #1e293b; color: #4ade80; font-size: 18px; font-weight: bold;"' 
+                    bg_cell = 'style="background-color: #ffedd5; color: #9a3412; font-size: 18px; font-weight: bold;"' 
                 elif score_val == 1: 
                     simbol_hub = "△"
-                    bg_cell = 'style="background-color: #1e293b; color: #fef08a; font-size: 18px; font-weight: bold;"' 
+                    bg_cell = 'style="background-color: #fef9c3; color: #854d0e; font-size: 18px; font-weight: bold;"' 
                 
                 html_hoq += f'<td {bg_cell}>{simbol_hub}</td>'
             html_hoq += '</tr>'
             
         # -------------------------------------------------------------
-        # 4. GENERATE FONDASI RUMAH HOQ (MUTED SCORE & WEIGHTS)
+        # 4. GENERATE FONDASI RUMAH HOQ (CERAH)
         # -------------------------------------------------------------
         # Baris Absolute Importance (Score)
         html_hoq += '<tr class="hoq-score-row">'
-        html_hoq += '<td style="text-align: right; color: #38bdf8;">Weighted Importance (Score)</td>'
-        html_hoq += '<td style="color: #38bdf8;">-</td>'
+        html_hoq += '<td style="text-align: right; font-weight: bold;">Weighted Importance (Score)</td>'
+        html_hoq += '<td>-</td>'
         for score in abs_importance:
-            html_hoq += f'<td style="background-color: #1e293b; color: #38bdf8 !important;">{int(score)}</td>'
+            html_hoq += f'<td style="font-weight: 700;">{int(score)}</td>'
         html_hoq += '</tr>'
 
         # Baris Relative Weight (%)
         html_hoq += '<tr class="hoq-weight-row">'
-        html_hoq += '<td style="text-align: right; color: #2dd4bf;">Relative Importance (%)</td>'
-        html_hoq += '<td style="color: #2dd4bf;">-</td>'
+        html_hoq += '<td style="text-align: right; font-weight: bold;">Relative Importance (%)</td>'
+        html_hoq += '<td>-</td>'
         for weight in rel_importance:
-            html_hoq += f'<td style="background-color: #1e293b; color: #2dd4bf !important;">{weight.round(1)}%</td>'
+            html_hoq += f'<td style="font-weight: 700;">{weight.round(1)}%</td>'
         html_hoq += '</tr>'
         
         html_hoq += '</table>'
-        html_hoq += '</div>' # Tutup div container scroll
+        html_hoq += '</div>'
         
-        # Render arsitektur bangunan rumah penuh ke screen
         st.markdown(html_hoq, unsafe_allow_html=True)
         
     except Exception as e:
