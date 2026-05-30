@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 # 1. SETTING HALAMAN & STYLE HOQ RUMAH
-st.set_page_config(page_title="Digital HoQ - UKM Tahu", layout="wide")
+st.set_page_config(page_title="Digital HoQ - Praktikum PTI 1", layout="wide")
 
 st.markdown("""
     <style>
@@ -139,7 +139,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 st.markdown('<p class="main-header">🏠 Digital House of Quality (HoQ)</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Optimalisasi Spesifikasi Teknis berdasarkan Voice of Customer (UKM Tahu Endang)</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Optimalisasi Spesifikasi Teknis berdasarkan Voice of Customer </p>', unsafe_allow_html=True)
 
 # 2. INISIALISASI DATA (Session State Utama)
 if 'df_whats' not in st.session_state:
